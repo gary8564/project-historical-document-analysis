@@ -6,7 +6,7 @@ Full Name: Chia Hao Chang
 
 ## II. Installation
 
-Install the repository in editable mode. Example for Ubuntu:
+Install the repository in editable mode. Example for MacOS/Linux(Ubuntu):
 
     python3 -m venv dlcv_final_project  
     source dlcv_final_project/bin/activate  
