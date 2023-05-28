@@ -10,5 +10,5 @@ Install the repository in editable mode. Example for MacOS/Linux(Ubuntu):
 
     python3 -m venv dlcv_final_project  
     source dlcv_final_project/bin/activate  
-    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu  
+    pip3 install torch torchvision  
     pip install -e .  
