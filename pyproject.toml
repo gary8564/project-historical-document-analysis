@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dlcv"
+version = "0.5"
+authors = [
+  { name="Chia Hao Chang", email="chia.hao.chang@uni-weimar.de" },
+]
+description = "DLCV final project package"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "matplotlib", 
+    "pandas", 
+    "scipy",
+    "tqdm",
+    "scikit-learn",
+    "seaborn",
+    "torchsummary",
+    "pytest" 
+]
