@@ -1,0 +1,129 @@
+"""
+References: 
+    1. https://github.com/pytorch/vision/blob/v0.3.0/references/detection/engine.py
+    2. https://debuggercafe.com/custom-object-detection-using-pytorch-faster-rcnn/
+    3. https://pseudo-lab.github.io/Tutorial-Book-en/chapters/en/object-detection/Ch4-RetinaNet.html
+"""
+
+import matplotlib.pyplot as plt
+import torch
+from tqdm import tqdm
+import pandas as pd
+import time
+from pycocotools.cocoeval import COCOeval
+from pycocotools.coco import COCO
+import numpy as np
+from utils import prepare_for_evaluation, cosine_warmup_lr_scheduler
+
+def train_one_epoch(model, data_loader, optimizer, device, curr_epoch, total_iters, lr_scheduler = None):
+    """
+    Trains a given model for one epoch using the provided data loader, criterion, and optimizer.
+
+    Args:
+        model (nn.Module): The model to be trained.
+        data_loader (DataLoader): The data loader providing the training data.
+        optimizer (torch.optim.Optimizer): The optimizer to be used for updating the model's parameters.
+        device (torch.device): The device on which the model is running (e.g., 'cpu' or 'cuda').
+        curr_epoch: The number of current epoch.
+        total_iters: The total number of iterations.
+        lr_scheduler (torch.optim.lr_scheduler): learning rate scheduler (Default: None)
+        
+    Returns:
+        loss_per_epoch(float): The average loss per batch for the entire epoch.
+        time_per_epoch(float): The training time for the entire epoch.
+    """
+    model.train(True)
+    running_loss = 0
+    if curr_epoch == 0:
+        warmup_iters = min(1000, len(data_loader) - 1)
+        warmup_initial_lr = 1e-03
+        lr_scheduler = cosine_warmup_lr_scheduler(optimizer, warmup_iters, total_iters, optimizer.param_groups[0]["lr"], warmup_initial_lr)
+    for data in tqdm(data_loader):
+        images, targets = data
+        images = list(image.to(device) for image in images)
+        targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
+        loss_dict = model(images, targets)
+        losses = sum(loss for loss in loss_dict.values())
+        optimizer.zero_grad()
+        losses.backward()
+        optimizer.step()
+        if lr_scheduler is not None:
+            lr_scheduler.step()
+        running_loss += losses.item()
+    loss_per_epoch = running_loss / len(data_loader)
+    return loss_per_epoch
+
+
+def validate_one_epoch(model, data_loader, device):
+    """
+    Tests a given model for one epoch using the provided data loader and criterion.
+
+    Args:
+        model (nn.Module): The model to be tested.
+        data_loader (DataLoader): The data loader providing the testing data.
+        device (torch.device): The device on which the model is running (e.g., 'cpu' or 'cuda').
+
+    Returns:
+        float: The average loss per batch for the entire epoch.
+    """
+    model.eval()
+    val_loss = 0
+    for images, targets in data_loader:
+        images = list(image.to(device) for image in images)
+        targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
+        loss_dict = model(images, targets)
+        losses = sum(loss for loss in loss_dict.values())
+        val_loss += losses.item()
+    loss_per_epoch = val_loss / len(data_loader)
+    return loss_per_epoch
+
+def train_and_validate_model(model, train_loader, test_loader, optimizer, num_epochs, device, lr_scheduler=None):
+    """
+    Trains a given model for a specified number of epochs using the provided data loader, criterion,
+    and optimizer, and tracks the loss for each epoch.
+
+    Args:
+        model (nn.Module): The model to be trained.
+        train_loader (DataLoader): The data loader providing the training data.
+        test_loader (DataLoader): The data loader providing the testing data.
+        optimizer (torch.optim.Optimizer): The optimizer to be used for updating the model's parameters.
+        num_epochs (int): The number of epochs to train the model.
+        device (torch.device): The device on which the model is running (e.g., 'cpu' or 'cuda').
+        scheduler (torch.optim.lr_scheduler, optional): The learning rate scheduler (default is None).
+
+    Returns:
+        list: A list of the average train loss per batch for each epoch.
+        list: A list of the average validation loss per batch for each epoch.
+    """
+    train_losses = []
+    val_losses = []
+    for e in range(num_epochs):
+        start = time.time()
+        # train(...)
+        train_per_epoch  = train_one_epoch(model, train_loader, optimizer, device, lr_scheduler)
+        # validate(...)
+        validate_per_epoch = validate_one_epoch(model, test_loader, device)
+        end = time.time()
+        print(f'\nEpoch {e+1} of {num_epochs}')
+        print(f'Training Loss: {train_per_epoch:.3f} \t\t Validation Loss: {validate_per_epoch} \t\t Time: {((end - start) / 60):.3f} mins')
+        train_losses.append(train_per_epoch)
+        val_losses.append(validate_per_epoch)
+    return train_losses, val_losses
+
+def save_results_csv(model_name, train_losses, val_losses):
+    """
+    Write the training and validation results to a .csv file, enabling the creation of new plots.
+    This feature is essential when running multiple training configurations on different machines, as you will need to merge the various .csv files and generate the training plots.
+    Args:
+        model_name (str): The name of the model (for the legend)
+        train_losses (list): Training losses per epoch
+        val_losses (list): Validation losses per epoch
+        val_top1_acc (list): top-1 accuracies per epoch
+        val_top5_acc (list): top-1 accuracies per epoch
+    """
+    result_dict = {'name': model_name, 'train_losses': train_losses, 'test_losses': val_losses}
+    df = pd.DataFrame.from_dict(result_dict) 
+    savepath = "%s.csv" %(model_name)
+    df.to_csv (savepath, index=False, header=True)
+
+
