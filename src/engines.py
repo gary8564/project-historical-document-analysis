@@ -13,7 +13,7 @@ import time
 from pycocotools.cocoeval import COCOeval
 from pycocotools.coco import COCO
 import numpy as np
-from utils import prepare_for_evaluation, cosine_warmup_lr_scheduler
+# from utils import prepare_for_evaluation, cosine_warmup_lr_scheduler
 
 def train_one_epoch(model, data_loader, optimizer, device, lr_scheduler = None):
     """
