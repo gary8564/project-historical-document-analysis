@@ -15,7 +15,7 @@ from pycocotools.coco import COCO
 import numpy as np
 from utils import prepare_for_evaluation, cosine_warmup_lr_scheduler
 
-def train_one_epoch(model, data_loader, optimizer, device, curr_epoch, total_iters, lr_scheduler = None):
+def train_one_epoch(model, data_loader, optimizer, device, lr_scheduler = None):
     """
     Trains a given model for one epoch using the provided data loader, criterion, and optimizer.
 
@@ -24,8 +24,6 @@ def train_one_epoch(model, data_loader, optimizer, device, curr_epoch, total_ite
         data_loader (DataLoader): The data loader providing the training data.
         optimizer (torch.optim.Optimizer): The optimizer to be used for updating the model's parameters.
         device (torch.device): The device on which the model is running (e.g., 'cpu' or 'cuda').
-        curr_epoch: The number of current epoch.
-        total_iters: The total number of iterations.
         lr_scheduler (torch.optim.lr_scheduler): learning rate scheduler (Default: None)
         
     Returns:
@@ -33,11 +31,7 @@ def train_one_epoch(model, data_loader, optimizer, device, curr_epoch, total_ite
         time_per_epoch(float): The training time for the entire epoch.
     """
     model.train(True)
-    running_loss = 0
-    if curr_epoch == 0:
-        warmup_iters = min(1000, len(data_loader) - 1)
-        warmup_initial_lr = 1e-03
-        lr_scheduler = cosine_warmup_lr_scheduler(optimizer, warmup_iters, total_iters, optimizer.param_groups[0]["lr"], warmup_initial_lr)
+    running_loss = 0        
     for data in tqdm(data_loader):
         images, targets = data
         images = list(image.to(device) for image in images)
@@ -47,7 +41,7 @@ def train_one_epoch(model, data_loader, optimizer, device, curr_epoch, total_ite
         optimizer.zero_grad()
         losses.backward()
         optimizer.step()
-        if lr_scheduler is not None:
+        if lr_scheduler:
             lr_scheduler.step()
         running_loss += losses.item()
     loss_per_epoch = running_loss / len(data_loader)
@@ -89,7 +83,7 @@ def train_and_validate_model(model, train_loader, test_loader, optimizer, num_ep
         optimizer (torch.optim.Optimizer): The optimizer to be used for updating the model's parameters.
         num_epochs (int): The number of epochs to train the model.
         device (torch.device): The device on which the model is running (e.g., 'cpu' or 'cuda').
-        scheduler (torch.optim.lr_scheduler, optional): The learning rate scheduler (default is None).
+        scheduler (torch.optim.lr_scheduler, optional): The learning rate scheduler is implemented. (default is False).
 
     Returns:
         list: A list of the average train loss per batch for each epoch.
