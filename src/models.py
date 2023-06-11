@@ -1,7 +1,7 @@
 import torchvision
 import torch
 from torch import nn
-from torchvision.models.detection import RetinaNet, RetinaNetHead, retinanet_resnet50_fpn_v2
+from torchvision.models.detection.retinanet import RetinaNet, RetinaNetHead, retinanet_resnet50_fpn_v2
 from torchvision.models.detection.rpn import AnchorGenerator
 
 
