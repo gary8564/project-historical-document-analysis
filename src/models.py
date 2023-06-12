@@ -1,7 +1,7 @@
 import torchvision
 import torch
 from torch import nn
-from torchvision.models.detection.retinanet import RetinaNet, RetinaNetHead, retinanet_resnet50_fpn_v2
+from torchvision.models.detection.retinanet import RetinaNet, RetinaNetHead, RetinaNet_ResNet50_FPN_V2_Weights, retinanet_resnet50_fpn_v2
 from torchvision.models.detection.rpn import AnchorGenerator
 
 
@@ -34,16 +34,16 @@ def retinaNet(num_classes, device, backbone=None):
         # Final customized RetinaNet model.
         model = RetinaNet(
             backbone=backboneModel,
-            num_classes=19,
+            num_classes=num_classes,
             rpn_anchor_generator=anchorGenerator(),
             box_roi_pool=roIPooler()
         )
         print(model)
         return model
     else:
-        model = retinanet_resnet50_fpn_v2(pretrained=True)
+        model = retinanet_resnet50_fpn_v2(weights=RetinaNet_ResNet50_FPN_V2_Weights.DEFAULT)
         # get number of input features and anchor boxed for the classifier
-        in_features = model.head.classification_head.conv[0].in_channels
+        in_features = model.head.classification_head.conv[0][0].in_channels
         num_anchors = model.head.classification_head.num_anchors
         # replace the pre-trained head with a new one
         model.head = RetinaNetHead(in_features, num_anchors, num_classes)
@@ -104,3 +104,4 @@ def roIPooler():
 
 if __name__ == "__main__":
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = retinaNet(num_classes=19, device=device)
