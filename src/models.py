@@ -39,7 +39,7 @@ def retinaNet(num_classes, device, backbone=None):
             box_roi_pool=roIPooler()
         )
         print(model)
-        return model
+        return model.to(device)
     else:
         model = retinanet_resnet50_fpn_v2(weights=RetinaNet_ResNet50_FPN_V2_Weights.DEFAULT)
         # get number of input features and anchor boxed for the classifier
@@ -48,7 +48,7 @@ def retinaNet(num_classes, device, backbone=None):
         # replace the pre-trained head with a new one
         model.head = RetinaNetHead(in_features, num_anchors, num_classes)
         print(model)
-        return model
+        return model.to(device)
         
 def viTBackBone(device):
     # Get pretrained weights for ViT-Base
