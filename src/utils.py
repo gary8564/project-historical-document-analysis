@@ -120,6 +120,13 @@ class TexBigDataset(Dataset):
     def get_height_and_width(self, idx):
         return self.annot_data['image'][idx]['height'], self.annot_data['image'][idx]['width']
 
+def collate_fn(batch):
+    """
+    To handle the data loading as different images may have different number 
+    of objects and to handle varying size tensors as well.
+    """
+    return tuple(zip(*batch))
+
 def cosine_warmup_lr_scheduler(optimizer, warmup_iters, total_iters, initial_lr, warmup_initial_lr):
     """
     Define the custom learning rate sheduler with a warm-up.
