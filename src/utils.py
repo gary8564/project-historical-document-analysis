@@ -97,6 +97,8 @@ class TexBigDataset(Dataset):
         boxes = datapoints.BoundingBox(boxes, 
                                        format=datapoints.BoundingBoxFormat.XYXY,
                                        spatial_size=F.get_spatial_size(img),)
+        if (len(boxes.shape) != 2):
+             boxes = boxes.unsqueeze(0)
         labels = torch.as_tensor(labels, dtype=torch.int64)
         image_id = torch.tensor(image_id)
         iscrowd = torch.as_tensor(iscrowd, dtype=torch.int64)
