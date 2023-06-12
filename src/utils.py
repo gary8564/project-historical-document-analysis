@@ -175,13 +175,13 @@ def get_pretrained_model_transform(pretrained_model_weights):
     pretrained_vit_transforms = pretrained_model_weights.transforms()
     print(pretrained_vit_transforms)
 
-def get_transform(transforms):
+def get_transform(moreAugmentations):
     """
     define the transforms for data augmentation
 
     Parameters
     ----------
-    transforms : boolean
+    moreAugmentations : boolean
         If true, more data transformations are operated to avoid overfitting.
 
     Returns
@@ -191,7 +191,7 @@ def get_transform(transforms):
     transformList = []
     transformList.append(transforms.ToImageTensor())
     transformList.append(transforms.ConvertImageDtype(torch.float32))
-    if transforms:
+    if moreAugmentations:
         transformList.append(transforms.RandomPhotometricDistort())
         transformList.append(transforms.RandomZoomOut(
             fill=defaultdict(lambda: 0, {Image.Image: (123, 117, 104)})
@@ -247,7 +247,7 @@ if __name__ == "__main__":
     train_annot_filename = "train"
     pretrained_vit_weights = models.ViT_B_16_Weights.DEFAULT 
     get_pretrained_model_transform(pretrained_vit_weights)
-    train_transformers = get_transform(transforms=True)
+    train_transformers = get_transform(moreAugmentations=True)
     train_data = TexBigDataset(train_img_path, train_annot_filename)
     train_sample = train_data[0]
     image, target = train_sample
