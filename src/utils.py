@@ -52,6 +52,7 @@ class TexBigDataset(Dataset):
         4. https://blog.paperspace.com/data-augmentation-for-object-detection-building-input-pipelines/
     """
     def __init__(self, root, annot_filename, transforms=None):
+        super().__init__()
         self.root = root
         self.transforms = transforms
         self.annot_filename = annot_filename
@@ -62,9 +63,9 @@ class TexBigDataset(Dataset):
         with open(annot_path, "r") as read_file:
            self.annot_data = json.load(read_file) 
 
-    def __getitem__(self, idx):
+    def __getitem__(self, index):
         # load images
-        img_filename = self.imgs[idx]
+        img_filename = self.imgs[index]
         img_path = os.path.join(self.root, self.annot_filename, img_filename)
         img = Image.open(img_path).convert("RGB")
         
@@ -94,22 +95,29 @@ class TexBigDataset(Dataset):
         # convert everything into a torch.Tensor
         # store required return data in the dict
         # boxes = torch.as_tensor(boxes, dtype=torch.float32)
-        boxes = datapoints.BoundingBox(boxes, 
+        if (len(boxes) > 0):
+            boxes = datapoints.BoundingBox(boxes, 
                                        format=datapoints.BoundingBoxFormat.XYXY,
                                        spatial_size=F.get_spatial_size(img),)
-        if (len(boxes.shape) != 2):
-             boxes = boxes.unsqueeze(0)
-        labels = torch.as_tensor(labels, dtype=torch.int64)
-        image_id = torch.tensor(image_id)
-        iscrowd = torch.as_tensor(iscrowd, dtype=torch.int64)
-        area = torch.as_tensor(area, dtype=torch.float32)
-        target = {}
-        target["boxes"] = boxes
-        target["labels"] = labels
-        target["image_id"] = image_id
-        target["area"] = area
-        target["iscrowd"] = iscrowd
-        
+            labels = torch.as_tensor(labels, dtype=torch.int64)
+            image_id = torch.tensor(image_id)
+            iscrowd = torch.as_tensor(iscrowd, dtype=torch.int64)
+            area = torch.as_tensor(area, dtype=torch.float32)
+            target = {}
+            target["boxes"] = boxes
+            target["labels"] = labels
+            target["image_id"] = image_id
+            target["area"] = area
+            target["iscrowd"] = iscrowd
+        else:
+            # negative example, ref: https://github.com/pytorch/vision/issues/2144
+            target = {"boxes": datapoints.BoundingBox(torch.zeros((0, 4), dtype=torch.float32), 
+                                       format=datapoints.BoundingBoxFormat.XYXY,
+                                       spatial_size=F.get_spatial_size(img),),
+                      "labels": torch.zeros(0, dtype=torch.int64),
+                      "image_id": 4,
+                      "area": torch.zeros(0, dtype=torch.float32),
+                      "iscrowd": torch.zeros((0,), dtype=torch.int64)}
         # apply the image transforms        
         if self.transforms is not None:
             img, target = self.transforms(img, target)
@@ -121,6 +129,7 @@ class TexBigDataset(Dataset):
     
     def get_height_and_width(self, idx):
         return self.annot_data['image'][idx]['height'], self.annot_data['image'][idx]['width']
+
 
 def collate_fn(batch):
     """
@@ -154,9 +163,6 @@ def cosine_warmup_lr_scheduler(optimizer, warmup_iters, total_iters, initial_lr,
         warmup_duration=warmup_iters,
         warmup_end_value=initial_lr)
     return lr_scheduler
-
-    
-    
     
 # Data augmentation: image transformation
 def get_pretrained_model_transform(pretrained_model_weights):
@@ -174,8 +180,8 @@ def get_pretrained_model_transform(pretrained_model_weights):
     -------
     pretrained model transformers
     """
-    pretrained_vit_transforms = pretrained_model_weights.transforms()
-    print(pretrained_vit_transforms)
+    pretrained_model_transforms= pretrained_model_weights.transforms()
+    return pretrained_model_transforms
 
 def get_transform(moreAugmentations):
     """
@@ -248,7 +254,7 @@ if __name__ == "__main__":
     train_img_path = "../archive"
     train_annot_filename = "train"
     pretrained_vit_weights = models.ViT_B_16_Weights.DEFAULT 
-    get_pretrained_model_transform(pretrained_vit_weights)
+    pretrained_vit_transforms = get_pretrained_model_transform(pretrained_vit_weights)
     train_transformers = get_transform(moreAugmentations=True)
     train_data = TexBigDataset(train_img_path, train_annot_filename)
     train_sample = train_data[0]
