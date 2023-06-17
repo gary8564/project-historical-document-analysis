@@ -4,8 +4,8 @@ import torch
 import torchvision
 import torchvision.transforms.v2 as transforms
 from torch import nn, optim
-from torchvision.transforms.v2 import functional as F
 torchvision.disable_beta_transforms_warning()
+from torchvision.transforms.v2 import functional as F
 from torchvision import models, datapoints
 from torchvision.utils import draw_bounding_boxes
 from torch.utils.data import Dataset
@@ -197,7 +197,8 @@ def get_transform(moreAugmentations):
     Pytorch transformers
     """
     transformList = []
-    transformList.append(transforms.ToImageTensor())
+    #transformList.append(transforms.ToImageTensor())
+    transformList.append(transforms.ToTensor())
     transformList.append(transforms.ConvertImageDtype(torch.float32))
     if moreAugmentations:
         transformList.append(transforms.RandomPhotometricDistort())
