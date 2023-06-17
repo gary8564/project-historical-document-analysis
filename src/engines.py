@@ -31,8 +31,9 @@ def train_one_epoch(model, data_loader, optimizer, device, lr_scheduler = None):
         time_per_epoch(float): The training time for the entire epoch.
     """
     model.train(True)
-    running_loss = 0        
-    for data in tqdm(data_loader):
+    running_loss = 0  
+    progress_bar = tqdm(data_loader, total=len(data_loader))      
+    for (i, data) in enumerate(progress_bar):
         images, targets = data
         images = list(image.to(device) for image in images)
         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
@@ -44,6 +45,7 @@ def train_one_epoch(model, data_loader, optimizer, device, lr_scheduler = None):
         if lr_scheduler:
             lr_scheduler.step()
         running_loss += losses.item()
+        progress_bar.set_description(desc=f"Loss: {losses.item():.4f}")
     loss_per_epoch = running_loss / len(data_loader)
     return loss_per_epoch
 
