@@ -197,7 +197,7 @@ def get_transform(moreAugmentations):
     Pytorch transformers
     """
     transformList = []
-    transformList.append(transforms.ToImageTensor())
+    transformList.append(transforms.ToTensor())
     transformList.append(transforms.ConvertImageDtype(torch.float32))
     if moreAugmentations:
         transformList.append(transforms.RandomPhotometricDistort())
