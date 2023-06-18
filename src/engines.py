@@ -68,6 +68,7 @@ def validate_one_epoch(model, data_loader, device):
         images = list(image.to(device) for image in images)
         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
         loss_dict = model(images, targets)
+        print(loss_dict)
         losses = sum(loss for loss in loss_dict.values())
         val_loss += losses.item()
     loss_per_epoch = val_loss / len(data_loader)
