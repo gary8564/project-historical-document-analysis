@@ -168,3 +168,7 @@ cython_debug/
 archive/
 *.zip
 *.zip.icloud
+
+# pretrained models
+pretrained/
+*.pt
