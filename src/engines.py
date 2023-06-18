@@ -10,8 +10,8 @@ import torch
 from tqdm import tqdm
 import pandas as pd
 import time
-from pycocotools.cocoeval import COCOeval
-from pycocotools.coco import COCO
+#from pycocotools.cocoeval import COCOeval
+#from pycocotools.coco import COCO
 import numpy as np
 # from utils import prepare_for_evaluation, cosine_warmup_lr_scheduler
 
@@ -122,4 +122,18 @@ def save_results_csv(model_name, train_losses, val_losses):
     savepath = "%s.csv" %(model_name)
     df.to_csv (savepath, index=False, header=True)
 
-
+if __name__ == "__main__":
+    from utils import *
+    from models import *
+    train_img_path = "../archive"
+    train_annot_filename = "train"
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = retinaNet(num_classes=20, device=device)
+    train_transformers = get_transform(moreAugmentations=True)
+    dataset = TexBigDataset(train_img_path, train_annot_filename, train_transformers)
+    data_loader = torch.utils.data.DataLoader(dataset, batch_size=2, shuffle=True, 
+                                              collate_fn=collate_fn)
+    for (i, data) in enumerate(data_loader):
+        images, targets = data
+        images = list(image.to(device) for image in images)
+        targets = [{k: v.to(device) for k, v in t.items()} for t in targets]

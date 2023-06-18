@@ -106,7 +106,7 @@ class TexBigDataset(Dataset):
             target = {}
             target["boxes"] = boxes
             target["labels"] = labels
-            target["image_id"] = image_id
+            target["image_id"] = torch.tensor(image_id)
             target["area"] = area
             target["iscrowd"] = iscrowd
         else:
@@ -115,9 +115,10 @@ class TexBigDataset(Dataset):
                                        format=datapoints.BoundingBoxFormat.XYXY,
                                        spatial_size=F.get_spatial_size(img),),
                       "labels": torch.zeros(0, dtype=torch.int64),
-                      "image_id": image_id,
+                      "image_id": torch.tensor(image_id),
                       "area": torch.zeros(0, dtype=torch.float32),
                       "iscrowd": torch.zeros((0,), dtype=torch.int64)}
+            
         # apply the image transforms        
         if self.transforms is not None:
             img, target = self.transforms(img, target)
@@ -197,7 +198,7 @@ def get_transform(moreAugmentations):
     Pytorch transformers
     """
     transformList = []
-    transformList.append(transforms.ToTensor())
+    transformList.append(transforms.PILToTensor())
     transformList.append(transforms.ConvertImageDtype(torch.float32))
     if moreAugmentations:
         transformList.append(transforms.RandomPhotometricDistort())
@@ -295,7 +296,6 @@ if __name__ == "__main__":
     plt.title("Cosine Warm-up Learning Rate Scheduler")
     plt.show()
     sns.reset_orig()
-    
     
 
     
