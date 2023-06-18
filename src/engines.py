@@ -10,8 +10,8 @@ import torch
 from tqdm import tqdm
 import pandas as pd
 import time
-#from pycocotools.cocoeval import COCOeval
-#from pycocotools.coco import COCO
+from pycocotools.cocoeval import COCOeval
+from pycocotools.coco import COCO
 import numpy as np
 # from utils import prepare_for_evaluation, cosine_warmup_lr_scheduler
 
@@ -121,6 +121,26 @@ def save_results_csv(model_name, train_losses, val_losses):
     df = pd.DataFrame.from_dict(result_dict) 
     savepath = "%s.csv" %(model_name)
     df.to_csv (savepath, index=False, header=True)
+    
+def evaluate(model, data_loader, device):
+    cpu_device = torch.device("cpu")
+    model.eval()
+    coco_gt = COCO(data_loader.dataset)
+    for image, targets in data_loader:
+        image = list(img.to(device) for img in image)
+        targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
+        outputs = model(image)
+        outputs = [{k: v.to(cpu_device) for k, v in t.items()} for t in outputs]
+        res = {target["image_id"].item(): output for target, output in zip(targets, outputs)}
+        img_ids = list(np.unique(list(predictions.keys())))
+        results = prepare_for_evaluation(res)
+        coco_dt = coco_gt.loadRes(results)
+        cocoEval = COCOeval(coco_gt, coco_dt, 'bbox') 
+        cocoEval.params.imgIds = img_ids 
+        cocoEval.evaluate() 
+    cocoEval.accumulate()
+    cocoEval.summarize()
+        
 
 if __name__ == "__main__":
     from utils import *

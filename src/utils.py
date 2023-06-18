@@ -235,7 +235,7 @@ def prepare_for_evaluation(predictions):
         boxes = torch.stack((xmin, ymin, xmax - xmin, ymax - ymin), dim=1).tolist()
         scores = prediction["scores"].tolist()
         labels = prediction["labels"].tolist()
-
+        
         coco_results.extend(
             [
                 {
@@ -248,7 +248,49 @@ def prepare_for_evaluation(predictions):
             ]
         )
     return coco_results
-    
+
+def load_pretrained_weights(model, weights_path, device):
+    """
+    Loads pretrained weights into the specified model and returns the model with the loaded weights.
+
+    Args:
+        model (nn.Module)
+        weights_path (str or pathlib.Path): The path to the file containing the pretrained weights.
+        classes (int): The number of classes in the original classification task.
+        device (torch.device): The device on which the model is running (e.g., 'cpu' or 'cuda').
+        new_classes (int): The number of classes in the new classification task.
+
+    Returns:
+        model (nn.Module): The model with the pretrained weights loaded.
+
+    Raises:
+        AssertionError: If the model_name is not in ["SimpleConvNet", "TwoLayerFullyConnectedNetwork"].
+    """
+    current_model_dict = model.state_dict()
+    loaded_state_dict = torch.load(weights_path, map_location=device)
+    new_state_dict = {k: v if v.size() == current_model_dict[k].size() 
+                    else  current_model_dict[k] for k,v in zip(current_model_dict.keys(), loaded_state_dict.values())}
+    model.load_state_dict(new_state_dict, strict=False)
+    model.to(device)
+    return model
+
+def freeze_layers(model, frozen_layers):
+    """
+    Freezes the specified layers of a neural network model. Freezing a layer means that its
+    parameters will not be updated during training.
+
+    Args:
+        model (nn.Module): The neural network model.
+        frozen_layers (list): A list of layer names to be frozen.
+    """
+    for name, param in model.named_parameters():
+        if param.requires_grad and any(layer in name for layer in frozen_layers):
+            param.requires_grad = False
+    print('After frozen, require grad parameter names:')
+    for name, param in model.named_parameters():
+        if param.requires_grad:
+            print(name)
+    return model
     
 if __name__ == "__main__":
     # Loading dataset
