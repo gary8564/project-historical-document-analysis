@@ -62,15 +62,13 @@ def validate_one_epoch(model, data_loader, device):
     Returns:
         float: The average loss per batch for the entire epoch.
     """
-    model.eval()
     val_loss = 0
     for images, targets in data_loader:
         images = list(image.to(device) for image in images)
         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
-        loss_dict_list = model(images, targets)
-        losses = 0
-        for loss_dict in loss_dict_list:
-            losses += sum(loss for loss in loss_dict['scores'])
+        with torch.no_grad():
+            loss_dict = model(images, targets)
+        losses = sum(loss for loss in loss_dict.values())
         val_loss += losses.item()
     loss_per_epoch = val_loss / len(data_loader)
     return loss_per_epoch
