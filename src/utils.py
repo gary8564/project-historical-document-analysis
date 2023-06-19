@@ -106,7 +106,7 @@ class TexBigDataset(Dataset):
             target = {}
             target["boxes"] = boxes
             target["labels"] = labels
-            target["image_id"] = torch.tensor(image_id)
+            target["image_id"] = torch.tensor([idx])
             target["area"] = area
             target["iscrowd"] = iscrowd
         else:
@@ -115,7 +115,7 @@ class TexBigDataset(Dataset):
                                        format=datapoints.BoundingBoxFormat.XYXY,
                                        spatial_size=F.get_spatial_size(img),),
                       "labels": torch.zeros(0, dtype=torch.int64),
-                      "image_id": torch.tensor(image_id),
+                      "image_id": torch.tensor([idx]),
                       "area": torch.zeros(0, dtype=torch.float32),
                       "iscrowd": torch.zeros((0,), dtype=torch.int64)}
             
