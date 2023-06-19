@@ -13,6 +13,8 @@ import time
 from pycocotools.cocoeval import COCOeval
 from pycocotools.coco import COCO
 import numpy as np
+import sys
+sys.path.append('/Users/kyle_lee/Desktop/Bauhaus/DL4CV/first-assignment-gary8564/src/') 
 
 def train_one_epoch(model, data_loader, optimizer, device, lr_scheduler = None):
     """
