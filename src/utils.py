@@ -247,7 +247,7 @@ def prepare_for_evaluation(predictions):
                 for k, box in enumerate(boxes)
             ]
         )
-    output_filepath = "./archive/val_pred.json"
+    output_filepath = "./val_pred.json"
     with open(output_filepath, "w") as final:
         json.dump(coco_results, final)
 
