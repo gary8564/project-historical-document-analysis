@@ -59,8 +59,8 @@ class TexBigDataset(Dataset):
         self.imgs_path = glob.glob(f"{self.root}/{annot_filename}/*")
         self.imgs = [image_path.split('/')[-1] for image_path in self.imgs_path]
         self.imgs = sorted(self.imgs)
-        annot_path = os.path.join(self.root, f"{self.annot_filename}.json")
-        with open(annot_path, "r") as read_file:
+        self.annot_path = os.path.join(self.root, f"{self.annot_filename}.json")
+        with open(self.annot_path, "r") as read_file:
            self.annot_data = json.load(read_file) 
 
     def __getitem__(self, index):
