@@ -247,7 +247,11 @@ def prepare_for_evaluation(predictions):
                 for k, box in enumerate(boxes)
             ]
         )
-    return coco_results
+    output_filepath = "./archive/val_pred.json"
+    with open(output_filepath, "w") as final:
+        json.dump(coco_results, final)
+
+    return coco_results, output_filepath
 
 def load_pretrained_weights(model, weights_path, device):
     """

@@ -122,19 +122,28 @@ def save_results_csv(model_name, train_losses, val_losses):
     savepath = "%s.csv" %(model_name)
     df.to_csv (savepath, index=False, header=True)
     
-def evaluate(model, data_loader, device):
+def evaluate(model, data_loader, device, gt_annotFilePath):
+    """
+    Evaluate the test dataset. Using built-in pycocotools for evaluation. 
+    Args:
+        model (nn.Module)
+        data_loader (DataLoader)
+        device (torch.device)
+        gt_annotFilePath (str): the annotation file path for the ground-truth test dataset.
+
+    """
     cpu_device = torch.device("cpu")
     model.eval()
-    coco_gt = COCO(data_loader.dataset)
+    coco_gt = COCO(gt_annotFilePath)
     for image, targets in data_loader:
         image = list(img.to(device) for img in image)
         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
         outputs = model(image)
         outputs = [{k: v.to(cpu_device) for k, v in t.items()} for t in outputs]
         res = {target["image_id"].item(): output for target, output in zip(targets, outputs)}
-        img_ids = list(np.unique(list(predictions.keys())))
-        results = prepare_for_evaluation(res)
-        coco_dt = coco_gt.loadRes(results)
+        img_ids = list(np.unique(list(res.keys())))
+        results, output_filepath = prepare_for_evaluation(res)
+        coco_dt = coco_gt.loadRes(output_filepath)
         cocoEval = COCOeval(coco_gt, coco_dt, 'bbox') 
         cocoEval.params.imgIds = img_ids 
         cocoEval.evaluate() 
