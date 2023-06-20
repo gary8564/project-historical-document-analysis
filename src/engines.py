@@ -70,9 +70,11 @@ def validate_one_epoch(model, data_loader, device):
         images = list(image.to(device) for image in images)
         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
         with torch.no_grad():
-            outputs = model(images, targets)
-        losses = sum(loss for loss in outputs.values())
+            loss_dict = model(images, targets)
+        losses = sum(loss for loss in loss_dict.values())
         val_loss += losses.item()
+        model.eval()
+        outputs = model(images, targets)
         # For mAP calculation using Torchmetrics.
         for i in range(len(images)):
             true_dict = dict()
@@ -84,6 +86,7 @@ def validate_one_epoch(model, data_loader, device):
             pred_dict['labels'] = outputs[i]['labels'].detach().cpu()
             predict.append(pred_dict)
             target.append(true_dict)
+        model.train()
     metric = MeanAveragePrecision()
     metric.update(predict, target)
     metric_summary = metric.compute()
