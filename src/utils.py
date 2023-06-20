@@ -136,7 +136,7 @@ class TexBigDataset(Dataset):
         return img, target
 
     def __len__(self):
-        return len(self.imgs)
+        return len(self.ids)
     
     def get_height_and_width(self, idx):
         return self.annot_data['image'][idx]['height'], self.annot_data['image'][idx]['width']
