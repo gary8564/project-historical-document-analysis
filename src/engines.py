@@ -7,6 +7,7 @@ References:
 
 import matplotlib.pyplot as plt
 import torch
+from torchmetrics.detection.mean_ap import MeanAveragePrecision
 from tqdm import tqdm
 import pandas as pd
 import time
@@ -63,15 +64,31 @@ def validate_one_epoch(model, data_loader, device):
         float: The average loss per batch for the entire epoch.
     """
     val_loss = 0
+    target = []
+    predict = []
     for images, targets in data_loader:
         images = list(image.to(device) for image in images)
         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
         with torch.no_grad():
-            loss_dict = model(images, targets)
-        losses = sum(loss for loss in loss_dict.values())
+            outputs = model(images, targets)
+        losses = sum(loss for loss in outputs.values())
         val_loss += losses.item()
+        # For mAP calculation using Torchmetrics.
+        for i in range(len(images)):
+            true_dict = dict()
+            pred_dict = dict()
+            true_dict['boxes'] = targets[i]['boxes'].detach().cpu()
+            true_dict['labels'] = targets[i]['labels'].detach().cpu()
+            pred_dict['boxes'] = outputs[i]['boxes'].detach().cpu()
+            pred_dict['scores'] = outputs[i]['scores'].detach().cpu()
+            pred_dict['labels'] = outputs[i]['labels'].detach().cpu()
+            predict.append(pred_dict)
+            target.append(true_dict)
+    metric = MeanAveragePrecision()
+    metric.update(predict, target)
+    metric_summary = metric.compute()
     loss_per_epoch = val_loss / len(data_loader)
-    return loss_per_epoch
+    return loss_per_epoch, metric_summary
 
 def train_and_validate_model(model, train_loader, test_loader, optimizer, num_epochs, device, lr_scheduler=None):
     """
@@ -93,18 +110,23 @@ def train_and_validate_model(model, train_loader, test_loader, optimizer, num_ep
     """
     train_losses = []
     val_losses = []
+    mAP_50 = []
+    mAP = []
     for e in range(num_epochs):
         start = time.time()
         # train(...)
         train_per_epoch  = train_one_epoch(model, train_loader, optimizer, device, lr_scheduler)
         # validate(...)
-        validate_per_epoch = validate_one_epoch(model, test_loader, device)
+        validate_per_epoch, metric_summary = validate_one_epoch(model, test_loader, device)
         end = time.time()
         print(f'\nEpoch {e+1} of {num_epochs}')
-        print(f'Training Loss: {train_per_epoch:.3f} \t\t Validation Loss: {validate_per_epoch} \t\t Time: {((end - start) / 60):.3f} mins')
+        print(f"Training Loss: {train_per_epoch:.3f} \t\t Validation Loss: {validate_per_epoch} \
+              \t\t mAP: {metric_summary['map']} \t\t Time: {((end - start) / 60):.3f} mins")
         train_losses.append(train_per_epoch)
         val_losses.append(validate_per_epoch)
-    return train_losses, val_losses
+        mAP_50.append(metric_summary['map_50'])
+        mAP.append(metric_summary['map'])
+    return train_losses, val_losses, mAP_50, mAP
 
 def save_results_csv(model_name, train_losses, val_losses):
     """
