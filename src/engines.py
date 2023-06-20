@@ -13,7 +13,7 @@ import time
 from pycocotools.cocoeval import COCOeval
 from pycocotools.coco import COCO
 import numpy as np
-
+import json
 
 def train_one_epoch(model, data_loader, optimizer, device, lr_scheduler = None):
     """
@@ -122,8 +122,6 @@ def save_results_csv(model_name, train_losses, val_losses):
     savepath = "%s.csv" %(model_name)
     df.to_csv (savepath, index=False, header=True)
     
-        
-
 if __name__ == "__main__":
     from utils import *
     from models import *

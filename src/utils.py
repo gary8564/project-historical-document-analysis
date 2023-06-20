@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 from ignite.handlers.param_scheduler import create_lr_scheduler_with_warmup
+from pycocotools.coco import COCO
 
 class TexBigDataset(Dataset):
     """
@@ -56,42 +57,51 @@ class TexBigDataset(Dataset):
         self.root = root
         self.transforms = transforms
         self.annot_filename = annot_filename
-        self.imgs_path = glob.glob(f"{self.root}/{annot_filename}/*")
-        self.imgs = [image_path.split('/')[-1] for image_path in self.imgs_path]
-        self.imgs = sorted(self.imgs)
+        #self.imgs_path = glob.glob(f"{self.root}/{annot_filename}/*")
+        #self.imgs = [image_path.split('/')[-1] for image_path in self.imgs_path]
+        #self.imgs = sorted(self.imgs)
         self.annot_path = os.path.join(self.root, f"{self.annot_filename}.json")
-        with open(self.annot_path, "r") as read_file:
-           self.annot_data = json.load(read_file) 
+        self.coco = COCO(self.annot_path)
+        self.ids = list(sorted(self.coco.imgs.keys()))
+        #with open(self.annot_path, "r") as read_file:
+        #    self.annot_data = json.load(read_file) 
 
     def __getitem__(self, index):
         # load images
-        img_filename = self.imgs[index]
+        #img_filename = self.imgs[index]
+        #matched_img = list(filter(lambda x: x["file_name"] == img_filename, self.annot_data["images"]))
+        #image_id = np.unique([image["id"] for image in matched_img])
+        coco = self.coco
+        img_id = self.ids[index]
+        ann_ids = coco.getAnnIds(imgIds=img_id)
+        coco_annotation = coco.loadAnns(ann_ids)
+        img_filename = coco.loadImgs(img_id)[0]['file_name']
         img_path = os.path.join(self.root, self.annot_filename, img_filename)
         img = Image.open(img_path).convert("RGB")
+        num_objs = len(coco_annotation) # number of objects in the image
         
         # get bounding box coordinates
         labels = []
         boxes = []
         iscrowd = []
         area = []
-        matched_img = list(filter(lambda x: x["file_name"] == img_filename, self.annot_data["images"]))
-        image_id = np.unique([image["id"] for image in matched_img])
         # COCO format: [xmin, ymin, width, height]
         # PyTorch format: [xmin, ymin, xmax, ymax]
-        matched_annot_idx = []
-        annotations = self.annot_data["annotations"]
-        for i, annot in enumerate(annotations):
-            if (annot["image_id"] in image_id):
-                matched_annot_idx.append(i)
-        for idx in matched_annot_idx:
-            xmin = annotations[idx]['bbox'][0]
-            ymin = annotations[idx]['bbox'][1]
-            xmax = xmin + annotations[idx]['bbox'][2]
-            ymax = ymin + annotations[idx]['bbox'][3]
+        #matched_annot_idx = []
+        #annotations = self.annot_data["annotations"]
+        #for i, annot in enumerate(annotations):
+        #    if (annot["image_id"] in image_id):
+        #        matched_annot_idx.append(i)
+        #for idx in matched_annot_idx:
+        for i, annot in enumerate(coco_annotation):
+            xmin = annot['bbox'][0]
+            ymin = annot['bbox'][1]
+            xmax = xmin + annot['bbox'][2]
+            ymax = ymin + annot['bbox'][3]
             boxes.append([xmin, ymin, xmax, ymax])
-            labels.append(annotations[idx]["category_id"])
-            iscrowd.append(annotations[idx]["iscrowd"])
-            area.append(annotations[idx]["area"])
+            labels.append(annot["category_id"])
+            iscrowd.append(annot["iscrowd"])
+            area.append(annot["area"])
         # convert everything into a torch.Tensor
         # store required return data in the dict
         # boxes = torch.as_tensor(boxes, dtype=torch.float32)
@@ -100,13 +110,13 @@ class TexBigDataset(Dataset):
                                        format=datapoints.BoundingBoxFormat.XYXY,
                                        spatial_size=F.get_spatial_size(img),)
             labels = torch.as_tensor(labels, dtype=torch.int64)
-            image_id = torch.tensor(image_id)
+            img_id = torch.tensor([img_id])
             iscrowd = torch.as_tensor(iscrowd, dtype=torch.int64)
             area = torch.as_tensor(area, dtype=torch.float32)
             target = {}
             target["boxes"] = boxes
             target["labels"] = labels
-            target["image_id"] = torch.tensor(image_id)
+            target["image_id"] = img_id
             target["area"] = area
             target["iscrowd"] = iscrowd
         else:
@@ -115,7 +125,7 @@ class TexBigDataset(Dataset):
                                        format=datapoints.BoundingBoxFormat.XYXY,
                                        spatial_size=F.get_spatial_size(img),),
                       "labels": torch.zeros(0, dtype=torch.int64),
-                      "image_id": torch.tensor(image_id),
+                      "image_id": torch.tensor([img_id]),
                       "area": torch.zeros(0, dtype=torch.float32),
                       "iscrowd": torch.zeros((0,), dtype=torch.int64)}
             
