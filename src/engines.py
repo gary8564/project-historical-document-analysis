@@ -131,7 +131,7 @@ def train_and_validate_model(model, train_loader, test_loader, optimizer, num_ep
         mAP.append(metric_summary['map'])
     return train_losses, val_losses, mAP_50, mAP
 
-def save_results_csv(model_name, train_losses, val_losses):
+def save_results_csv(model_name, train_losses, val_losses, mAP):
     """
     Write the training and validation results to a .csv file, enabling the creation of new plots.
     This feature is essential when running multiple training configurations on different machines, as you will need to merge the various .csv files and generate the training plots.
@@ -139,10 +139,10 @@ def save_results_csv(model_name, train_losses, val_losses):
         model_name (str): The name of the model (for the legend)
         train_losses (list): Training losses per epoch
         val_losses (list): Validation losses per epoch
-        val_top1_acc (list): top-1 accuracies per epoch
-        val_top5_acc (list): top-1 accuracies per epoch
+        mAP (list): Validation mean average precision per epoch
     """
-    result_dict = {'name': model_name, 'train_losses': train_losses, 'test_losses': val_losses}
+    result_dict = {'name': model_name, 'train_losses': train_losses, 
+                   'test_losses': val_losses, 'mAP': mAP}
     df = pd.DataFrame.from_dict(result_dict) 
     savepath = "%s.csv" %(model_name)
     df.to_csv (savepath, index=False, header=True)
