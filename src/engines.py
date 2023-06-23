@@ -180,7 +180,7 @@ def plot_multiple_losses_and_accuracies(model_data_list):
     for i, model_data in enumerate(model_data_list):
         train_losses = model_data.get("train_losses")
         test_losses = model_data.get("test_losses")
-        test_mAP = model_data.get("test_mAP")
+        test_mAP = model_data.get("mAP")
         line, = ax0.plot(train_losses, label=model_data.get("name")+" (Train)", linestyle = '-')
         ax0.plot(test_losses, label=model_data.get("name")+" (Test)", 
                  color = line.get_color(), linestyle = ':')
