@@ -184,7 +184,7 @@ def plot_multiple_losses_and_accuracies(model_data_list):
         line, = ax0.plot(train_losses, label=model_data.get("name")+" (Train)", linestyle = '-')
         ax0.plot(test_losses, label=model_data.get("name")+" (Test)", 
                  color = line.get_color(), linestyle = ':')
-        ax1.plot(test_top1_accuracies, label=model_data.get("name"))
+        ax1.plot(test_mAP, label=model_data.get("name"))
         ax0.legend(fontsize="14")
         ax1.legend(fontsize="14")
         ax0.set_title("Loss", fontsize=26)
