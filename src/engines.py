@@ -162,3 +162,40 @@ if __name__ == "__main__":
         images, targets = data
         images = list(image.to(device) for image in images)
         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
+
+def plot_multiple_losses_and_accuracies(model_data_list):
+    """
+    Plots training and testing losses and mAP for multiple models.
+
+    Args:
+        model_data_list (list of dict): A list of dictionaries containing the following keys:
+            - 'name' (str): The name of the model (for the legend)
+            - 'train_losses' (list): Training losses per epoch
+            - 'test_losses' (list): Testing losses per epoch
+            - 'test_mAP' (list): Testing mean average precision per epoch
+    """
+    fig = plt.figure(figsize=(21,15))
+    ax0 = fig.add_subplot(121)
+    ax1 = fig.add_subplot(122)
+    for i, model_data in enumerate(model_data_list):
+        train_losses = model_data.get("train_losses")
+        test_losses = model_data.get("test_losses")
+        test_mAP = model_data.get("test_mAP")
+        line, = ax0.plot(train_losses, label=model_data.get("name")+" (Train)", linestyle = '-')
+        ax0.plot(test_losses, label=model_data.get("name")+" (Test)", 
+                 color = line.get_color(), linestyle = ':')
+        ax1.plot(test_top1_accuracies, label=model_data.get("name"))
+        ax0.legend(fontsize="14")
+        ax1.legend(fontsize="14")
+        ax0.set_title("Loss", fontsize=26)
+        ax1.set_title("mAP", fontsize=26)
+        ax0.set_xlabel("epoch", fontsize=20)
+        ax0.set_ylabel("loss", fontsize=20)
+        ax1.set_xlabel("epoch", fontsize=20)
+        ax1.set_ylabel("mAP", fontsize=20)
+        ax0.tick_params(axis='x', labelsize=18)
+        ax0.tick_params(axis='y', labelsize=18)
+        ax1.tick_params(axis='x', labelsize=18)
+        ax1.tick_params(axis='y', labelsize=18)
+    fig.suptitle("Performance for different model architectures", fontsize=36)
+    plt.show()
