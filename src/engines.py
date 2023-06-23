@@ -193,6 +193,8 @@ def plot_multiple_losses_and_accuracies(model_data_list):
         ax0.set_ylabel("loss", fontsize=20)
         ax1.set_xlabel("epoch", fontsize=20)
         ax1.set_ylabel("mAP", fontsize=20)
+        ax0.set_xticks([0,5,10,15,20]) 
+        ax1.set_xticks([0,5,10,15,20])
         ax0.tick_params(axis='x', labelsize=18)
         ax0.tick_params(axis='y', labelsize=18)
         ax1.tick_params(axis='x', labelsize=18)
