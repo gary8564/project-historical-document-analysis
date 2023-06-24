@@ -159,7 +159,8 @@ def cosine_warmup_lr_scheduler(optimizer, warmup_iters, total_iters, initial_lr,
     Return: 
         cosine warmup scheduler
     """
-    warmup_scheduler = optim.lr_scheduler.LinearLR(optimizer, start_factor=0.01, total_iters=warmup_iters)
+    start_factor = warmup_initial_lr / initial_lr
+    warmup_scheduler = optim.lr_scheduler.LinearLR(optimizer, start_factor=start_factor, total_iters=warmup_iters)
     after_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=total_iters)
     lr_scheduler = optim.lr_scheduler.ChainedScheduler([warmup_scheduler, after_scheduler])
     return lr_scheduler
