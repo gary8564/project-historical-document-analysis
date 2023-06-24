@@ -50,9 +50,9 @@ def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_rati
         if anchor_sizes and aspect_ratios:
             pass
         elif anchor_sizes:
-            aspect_ratios = ((0.5, 1.0, 2.0),)
+            aspect_ratios = ((0.5, 1.0, 2.0),) * len(anchor_sizes) 
         elif aspect_ratios:
-            anchor_sizes = ((32, 64, 128, 256, 512),)
+            anchor_sizes = ((32,), (64,), (128,), (256,), (512,)) 
         model.anchor_generator = anchorGenerator(anchor_sizes, aspect_ratios)
         in_features = model.head.classification_head.conv[0][0].in_channels
         num_anchors = model.anchor_generator.num_anchors_per_location()[0]
@@ -66,8 +66,8 @@ def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_rati
         else:
             backboneModel = swinTBackBone(device)
         # Final customized RetinaNet model.
-        anchor_sizes=((32, 64, 128, 256, 512),)
-        aspect_ratios=((0.5, 1.0, 2.0),)
+        anchor_sizes = ((32,), (64,), (128,), (256,), (512,)) 
+        aspect_ratios = ((0.5, 1.0, 2.0),) * len(anchor_sizes) 
         model = RetinaNet(
             backbone=backboneModel,
             num_classes=num_classes,

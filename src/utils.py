@@ -140,7 +140,7 @@ class TexBigDataset(Dataset):
     def get_height_and_width(self, idx):
         return self.annot_data['image'][idx]['height'], self.annot_data['image'][idx]['width']
 
-def cosine_warmup_lr_scheduler(optimizer, warmup_iters, total_iters, initial_lr, warmup_initial_lr):
+def cosine_warmup_lr_scheduler(optimizer, warmup_iters, constant_iters, total_iters, initial_lr, warmup_initial_lr):
     """
     Define the custom learning rate sheduler with a warm-up.
     The currently most popular scheduler is the cosine warm-up scheduler, 
@@ -153,6 +153,7 @@ def cosine_warmup_lr_scheduler(optimizer, warmup_iters, total_iters, initial_lr,
     Args:
         optimizer (Optimizer): Wrapped optimizer.
         warmup_iters: number of iterations for warm-up learning rate.
+        constant_iters: number of iterations where the learning rates stay constant.
         total_iters: maximum number of iterations.
         initial_lr: learning rate for the initial scheduler.
         warnup_initial_lr: learning rate in the beginning of warmup.
@@ -161,8 +162,8 @@ def cosine_warmup_lr_scheduler(optimizer, warmup_iters, total_iters, initial_lr,
     """
     start_factor = warmup_initial_lr / initial_lr
     warmup_scheduler = optim.lr_scheduler.LinearLR(optimizer, start_factor=start_factor, total_iters=warmup_iters)
-    after_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=total_iters)
-    lr_scheduler = optim.lr_scheduler.ChainedScheduler([warmup_scheduler, after_scheduler])
+    decay_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=total_iters-constant_iters, eta_min=1e-04)
+    lr_scheduler = optim.lr_scheduler.SequentialLR(optimizer, schedulers=[warmup_scheduler, decay_scheduler], milestones=[constant_iters])
     return lr_scheduler
 
 def collate_fn(batch):
@@ -327,10 +328,11 @@ if __name__ == "__main__":
     p = nn.Parameter(torch.empty(4, 4))
     total_iters = 10000
     warmup_iters = 1000
+    constant_iters = int(total_iters * 0.6)
     initial_lr = 1e-3
-    warmup_initial_lr = 1e-5
+    warmup_initial_lr = 5e-04
     optimizer = optim.Adam([p], lr=initial_lr) 
-    lr_scheduler = cosine_warmup_lr_scheduler(optimizer, warmup_iters, total_iters, initial_lr, warmup_initial_lr)
+    lr_scheduler = cosine_warmup_lr_scheduler(optimizer, warmup_iters, constant_iters, total_iters, initial_lr, warmup_initial_lr)
     sns.set()
     x = [] 
     y = [] 
