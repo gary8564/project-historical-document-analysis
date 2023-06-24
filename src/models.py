@@ -52,7 +52,7 @@ def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_rati
         elif anchor_sizes:
             aspect_ratios = ((0.5, 1.0, 2.0),) * len(anchor_sizes) 
         elif aspect_ratios:
-            anchor_sizes = ((32,), (64,), (128,), (256,), (512,)) 
+            anchor_sizes = tuple((x, int(x * 2 ** (1.0 / 3)), int(x * 2 ** (2.0 / 3))) for x in [32, 64, 128, 256, 512])
         model.anchor_generator = anchorGenerator(anchor_sizes, aspect_ratios)
         in_features = model.head.classification_head.conv[0][0].in_channels
         num_anchors = model.anchor_generator.num_anchors_per_location()[0]
@@ -66,7 +66,7 @@ def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_rati
         else:
             backboneModel = swinTBackBone(device)
         # Final customized RetinaNet model.
-        anchor_sizes = ((32,), (64,), (128,), (256,), (512,)) 
+        anchor_sizes = tuple((x, int(x * 2 ** (1.0 / 3)), int(x * 2 ** (2.0 / 3))) for x in [32, 64, 128, 256, 512])
         aspect_ratios = ((0.5, 1.0, 2.0),) * len(anchor_sizes) 
         model = RetinaNet(
             backbone=backboneModel,
@@ -137,6 +137,6 @@ def roIPooler():
 if __name__ == "__main__":
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     backbone = "SwinT"
-    anchor_sizes = ((16, 32, 64, 128, 256, 512),)
-    aspect_ratios=((0.33, 0.5, 1.0, 1.33, 2.0),)
+    anchor_sizes = tuple((x, int(x * 2 ** (1.0 / 3)), int(x * 2 ** (2.0 / 3))) for x in [16, 32, 64, 128, 256, 512])
+    aspect_ratios=((0.33, 0.5, 1.0, 1.33, 2.0),) * len(anchor_sizes)
     model = retinaNet(num_classes=20, device=device, backbone=None, anchor_sizes=anchor_sizes, aspect_ratios=aspect_ratios)
