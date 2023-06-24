@@ -15,7 +15,6 @@ from collections import defaultdict
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
-from ignite.handlers.param_scheduler import create_lr_scheduler_with_warmup
 from pycocotools.coco import COCO
 
 class TexBigDataset(Dataset):
@@ -141,14 +140,6 @@ class TexBigDataset(Dataset):
     def get_height_and_width(self, idx):
         return self.annot_data['image'][idx]['height'], self.annot_data['image'][idx]['width']
 
-
-def collate_fn(batch):
-    """
-    To handle the data loading as different images may have different number 
-    of objects and to handle varying size tensors as well.
-    """
-    return tuple(zip(*batch))
-
 def cosine_warmup_lr_scheduler(optimizer, warmup_iters, total_iters, initial_lr, warmup_initial_lr):
     """
     Define the custom learning rate sheduler with a warm-up.
@@ -168,12 +159,17 @@ def cosine_warmup_lr_scheduler(optimizer, warmup_iters, total_iters, initial_lr,
     Return: 
         cosine warmup scheduler
     """
-    lr_scheduler = create_lr_scheduler_with_warmup(
-        optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=total_iters-warmup_iters),
-        warmup_start_value=warmup_initial_lr,
-        warmup_duration=warmup_iters,
-        warmup_end_value=initial_lr)
+    warmup_scheduler = optim.lr_scheduler.LinearLR(optimizer, start_factor=0.01, total_iters=warmup_iters)
+    after_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=total_iters)
+    lr_scheduler = optim.lr_scheduler.ChainedScheduler([warmup_scheduler, after_scheduler])
     return lr_scheduler
+
+def collate_fn(batch):
+    """
+    To handle the data loading as different images may have different number 
+    of objects and to handle varying size tensors as well.
+    """
+    return tuple(zip(*batch))
     
 # Data augmentation: image transformation
 def get_pretrained_model_transform(pretrained_model_weights):
@@ -338,9 +334,10 @@ if __name__ == "__main__":
     x = [] 
     y = [] 
     for i in range(total_iters): 
-        lr_scheduler(None)
+        optimizer.step()
         x.append(i) 
         y.append(optimizer.param_groups[0]['lr']) 
+        lr_scheduler.step()
     plt.figure(figsize=(10, 6))
     plt.plot(x, y)
     plt.ylabel("Learning rate")

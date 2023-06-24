@@ -5,7 +5,7 @@ from torchvision.models.detection.retinanet import RetinaNet, RetinaNetHead, Ret
 from torchvision.models.detection.rpn import AnchorGenerator
 
 
-def retinaNet(num_classes, device, backbone=None):
+def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_ratios=None):
     """
     Build the RetinaNet model.
     
@@ -19,13 +19,19 @@ def retinaNet(num_classes, device, backbone=None):
         None by default: pretrained RetinaNet baseline model from Pytorch.
         If not None, must be one of ["ViT", "SwinT"] which
         ViT: VisionTransformer, SwinT: SwinTransformer
+    anchor_sizes : tuple
+    aspect ratios : tuple
+        aspect ratios = height / width for each anchor. 
+        sizes[i] and aspect_ratios[i] can have an arbitrary number of elements,
+        and AnchorGenerator will output a set of sizes[i] * aspect_ratios[i] anchors
+        per spatial location for feature map i.
 
     Returns
     -------
     model : torchvisions.models
         RetinaNet training model 
     """
-    if backbone:
+    if all(item is not None for item in [backbone, anchor_sizes, aspect_ratios]):
         assert backbone in ["ViT", "SwinT"]
         if (backbone == "ViT"):
             backboneModel = viTBackBone(device)
@@ -35,11 +41,42 @@ def retinaNet(num_classes, device, backbone=None):
         model = RetinaNet(
             backbone=backboneModel,
             num_classes=num_classes,
-            rpn_anchor_generator=anchorGenerator(),
+            rpn_anchor_generator=anchorGenerator(anchor_sizes, aspect_ratios),
             box_roi_pool=roIPooler()
         )
-        #print(model)
+        print(model)
         return model.to(device)
+    if ((anchor_sizes is not None) or (aspect_ratios is not None)):
+        model = retinanet_resnet50_fpn_v2(weights=RetinaNet_ResNet50_FPN_V2_Weights.DEFAULT)
+        if anchor_sizes and aspect_ratios:
+            pass
+        elif anchor_sizes:
+            aspect_ratios = ((0.5, 1.0, 2.0),)
+        elif aspect_ratios:
+            anchor_sizes = ((32, 64, 128, 256, 512),)
+        model.anchor_generator = anchorGenerator(anchor_sizes, aspect_ratios)
+        in_features = model.head.classification_head.conv[0][0].in_channels
+        num_anchors = model.head.classification_head.num_anchors
+        model.head = RetinaNetHead(in_features, num_anchors, num_classes)
+        print(model)
+        return model.to(device)
+    if backbone:
+        assert backbone in ["ViT", "SwinT"]
+        if (backbone == "ViT"):
+            backboneModel = viTBackBone(device)
+        else:
+            backboneModel = swinTBackBone(device)
+        # Final customized RetinaNet model.
+        anchor_sizes=((32, 64, 128, 256, 512),)
+        aspect_ratios=((0.5, 1.0, 2.0),)
+        model = RetinaNet(
+            backbone=backboneModel,
+            num_classes=num_classes,
+            rpn_anchor_generator=anchorGenerator(anchor_sizes, aspect_ratios),
+            box_roi_pool=roIPooler()
+        )
+        print(model)
+        return model.to(device)    
     else:
         model = retinanet_resnet50_fpn_v2(weights=RetinaNet_ResNet50_FPN_V2_Weights.DEFAULT)
         # get number of input features and anchor boxed for the classifier
@@ -47,7 +84,7 @@ def retinaNet(num_classes, device, backbone=None):
         num_anchors = model.head.classification_head.num_anchors
         # replace the pre-trained head with a new one
         model.head = RetinaNetHead(in_features, num_anchors, num_classes)
-        #print(model)
+        print(model)
         return model.to(device)
         
 def viTBackBone(device):
@@ -78,13 +115,10 @@ def swinTBackBone(device):
     backbone.out_channels = 1024
     return backbone
 
-def anchorGenerator():
+def anchorGenerator(anchor_sizes, aspect_ratios):
     # Generate anchors using the RPN. Here, we are using 5x3 anchors.
-    # Anchors with 5 different sizes and 3 different aspect ratios.
-    anchor_generator = AnchorGenerator(
-        sizes=((32, 64, 128, 256, 512),), 
-        aspect_ratios=((0.5, 1.0, 2.0),)
-    )
+    # Anchors with 5 different sizes and 3 different aspect ratios(h/w).
+    anchor_generator = AnchorGenerator(anchor_sizes, aspect_ratios)
     return anchor_generator
     
     
@@ -104,4 +138,7 @@ def roIPooler():
 
 if __name__ == "__main__":
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = retinaNet(num_classes=20, device=device)
+    backbone = "SwinT"
+    anchor_sizes = ((16, 32, 64, 128, 256, 512),)
+    aspect_ratios=((0.33, 0.5, 1.0, 1.33, 2.0),)
+    model = retinaNet(num_classes=20, device=device, backbone=backbone, anchor_sizes=anchor_sizes, aspect_ratios=aspect_ratios)
