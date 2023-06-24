@@ -1,9 +1,10 @@
 import torchvision
 import torch
 from torch import nn
+from torchvision.models import ResNet50_Weights, ResNeXt101_32X8D_Weights
 from torchvision.models.detection.retinanet import RetinaNet, RetinaNetHead, RetinaNet_ResNet50_FPN_V2_Weights, retinanet_resnet50_fpn_v2
 from torchvision.models.detection.rpn import AnchorGenerator
-
+from torchvision.models.detection.backbone_utils import resnet_fpn_backbone
 
 def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_ratios=None):
     """
@@ -31,43 +32,24 @@ def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_rati
     model : torchvisions.models
         RetinaNet training model 
     """
-    if all(item is not None for item in [backbone, anchor_sizes, aspect_ratios]):
-        assert backbone in ["ViT", "SwinT"]
-        if (backbone == "ViT"):
-            backboneModel = viTBackBone(device)
-        else:
-            backboneModel = swinTBackBone(device)
-        # Final customized RetinaNet model.
-        model = RetinaNet(
-            backbone=backboneModel,
-            num_classes=num_classes,
-            anchor_generator=anchorGenerator(anchor_sizes, aspect_ratios),
-        )
-        print(model)
-        return model.to(device)
-    if ((anchor_sizes is not None) or (aspect_ratios is not None)):
-        model = retinanet_resnet50_fpn_v2(weights=RetinaNet_ResNet50_FPN_V2_Weights.DEFAULT)
+    if any(item is not None for item in [backbone, anchor_sizes, aspect_ratios]):
+        backboneModel = resnet_fpn_backbone('resnet50', weights=ResNet50_Weights.DEFAULT)
+        anchor_sizes = tuple((x, int(x * 2 ** (1.0 / 3)), int(x * 2 ** (2.0 / 3))) for x in [32, 64, 128, 256, 512])
+        aspect_ratios = ((0.5, 1.0, 2.0),) * len(anchor_sizes) 
+        if backbone:
+            assert backbone in ["ResNet_FPN", "ViT", "SwinT"]
+            if (backbone == "ViT"):
+                backboneModel = viTBackBone(device)
+            elif (backbone == "SwinT"):
+                backboneModel = swinTBackBone(device)
+            else:
+                backboneModel = resnet_fpn_backbone('resnext101_32x8d', weights=ResNeXt101_32X8D_Weights.DEFAUL)
         if anchor_sizes and aspect_ratios:
             pass
         elif anchor_sizes:
             aspect_ratios = ((0.5, 1.0, 2.0),) * len(anchor_sizes) 
         elif aspect_ratios:
             anchor_sizes = tuple((x, int(x * 2 ** (1.0 / 3)), int(x * 2 ** (2.0 / 3))) for x in [32, 64, 128, 256, 512])
-        model.anchor_generator = anchorGenerator(anchor_sizes, aspect_ratios)
-        in_features = model.head.classification_head.conv[0][0].in_channels
-        num_anchors = model.anchor_generator.num_anchors_per_location()[0]
-        model.head = RetinaNetHead(in_features, num_anchors, num_classes)
-        print(model)
-        return model.to(device)
-    if backbone:
-        assert backbone in ["ViT", "SwinT"]
-        if (backbone == "ViT"):
-            backboneModel = viTBackBone(device)
-        else:
-            backboneModel = swinTBackBone(device)
-        # Final customized RetinaNet model.
-        anchor_sizes = tuple((x, int(x * 2 ** (1.0 / 3)), int(x * 2 ** (2.0 / 3))) for x in [32, 64, 128, 256, 512])
-        aspect_ratios = ((0.5, 1.0, 2.0),) * len(anchor_sizes) 
         model = RetinaNet(
             backbone=backboneModel,
             num_classes=num_classes,
@@ -136,7 +118,7 @@ def roIPooler():
 
 if __name__ == "__main__":
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    backbone = "SwinT"
-    anchor_sizes = tuple((x, int(x * 2 ** (1.0 / 3)), int(x * 2 ** (2.0 / 3))) for x in [16, 32, 64, 128, 256, 512])
+    backbone = "ResNet_FPN"
+    anchor_sizes = tuple((x, int(x * 2 ** (1.0 / 3)), int(x * 2 ** (2.0 / 3))) for x in [16, 32, 64, 128, 256])
     aspect_ratios=((0.33, 0.5, 1.0, 1.33, 2.0),) * len(anchor_sizes)
     model = retinaNet(num_classes=20, device=device, backbone=None, anchor_sizes=anchor_sizes, aspect_ratios=aspect_ratios)
