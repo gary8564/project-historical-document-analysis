@@ -41,8 +41,7 @@ def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_rati
         model = RetinaNet(
             backbone=backboneModel,
             num_classes=num_classes,
-            rpn_anchor_generator=anchorGenerator(anchor_sizes, aspect_ratios),
-            box_roi_pool=roIPooler()
+            anchor_generator=anchorGenerator(anchor_sizes, aspect_ratios),
         )
         print(model)
         return model.to(device)
@@ -56,7 +55,7 @@ def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_rati
             anchor_sizes = ((32, 64, 128, 256, 512),)
         model.anchor_generator = anchorGenerator(anchor_sizes, aspect_ratios)
         in_features = model.head.classification_head.conv[0][0].in_channels
-        num_anchors = model.head.classification_head.num_anchors
+        num_anchors = model.anchor_generator.num_anchors_per_location()[0]
         model.head = RetinaNetHead(in_features, num_anchors, num_classes)
         print(model)
         return model.to(device)
@@ -72,8 +71,7 @@ def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_rati
         model = RetinaNet(
             backbone=backboneModel,
             num_classes=num_classes,
-            rpn_anchor_generator=anchorGenerator(anchor_sizes, aspect_ratios),
-            box_roi_pool=roIPooler()
+            anchor_generator=anchorGenerator(anchor_sizes, aspect_ratios),
         )
         print(model)
         return model.to(device)    
@@ -141,4 +139,4 @@ if __name__ == "__main__":
     backbone = "SwinT"
     anchor_sizes = ((16, 32, 64, 128, 256, 512),)
     aspect_ratios=((0.33, 0.5, 1.0, 1.33, 2.0),)
-    model = retinaNet(num_classes=20, device=device, backbone=backbone, anchor_sizes=anchor_sizes, aspect_ratios=aspect_ratios)
+    model = retinaNet(num_classes=20, device=device, backbone=None, anchor_sizes=anchor_sizes, aspect_ratios=aspect_ratios)
