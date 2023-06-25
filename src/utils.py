@@ -304,7 +304,7 @@ if __name__ == "__main__":
     batches = 1000
     total_iters = epochs * batches
     #optimizer = optim.Adam([p], lr=initial_lr) 
-    optimizer = optim.SGD([p], lr=0.005,
+    optimizer = optim.SGD([p], lr=1e-03,
                           momentum=0.9, weight_decay=0.0005)
     lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
                                                    step_size=5,
@@ -329,7 +329,7 @@ if __name__ == "__main__":
     plt.figure(figsize=(10, 6))
     plt.plot(x, y)
     plt.ylabel("Learning rate")
-    plt.xlabel("Iterations (in batches)")
+    plt.xlabel("Iterations")
     plt.title("Linearly Warm-up Step Decay Learning Rate Scheduler")
     plt.show()
     sns.reset_orig()

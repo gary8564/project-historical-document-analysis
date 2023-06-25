@@ -94,7 +94,7 @@ def validate_one_epoch(model, data_loader, device):
     loss_per_epoch = val_loss / len(data_loader)
     return loss_per_epoch, metric_summary
 
-def train_and_validate_model(model, train_loader, test_loader, optimizer, num_epochs, device, lr_scheduler=None):
+def train_and_validate_model(model, train_loader, test_loader, optimizer, num_epochs, device, warmup = False, lr_scheduler=None):
     """
     Trains a given model for a specified number of epochs using the provided data loader, criterion,
     and optimizer, and tracks the loss for each epoch.
@@ -106,7 +106,8 @@ def train_and_validate_model(model, train_loader, test_loader, optimizer, num_ep
         optimizer (torch.optim.Optimizer): The optimizer to be used for updating the model's parameters.
         num_epochs (int): The number of epochs to train the model.
         device (torch.device): The device on which the model is running (e.g., 'cpu' or 'cuda').
-        scheduler (torch.optim.lr_scheduler, optional): The learning rate scheduler is implemented. (default is False).
+        warmup (boolean): whether to activate the warm-up learning rate scheduler (default is False).
+        lr_scheduler (torch.optim.lr_scheduler, optional): The learning rate scheduler is implemented. (default is False).
 
     Returns:
         list: A list of the average train loss per batch for each epoch.
@@ -120,7 +121,7 @@ def train_and_validate_model(model, train_loader, test_loader, optimizer, num_ep
         start = time.time()
         # train(...)
         warmup_scheduler = None
-        if e == 0:
+        if e == 0 and warmup:
             warmup_iters = min(1000, len(train_loader) - 1)
             warmup_scheduler = warmup_lr_scheduler(optimizer, warmup_iters)
         train_per_epoch  = train_one_epoch(model, train_loader, optimizer, device, warmup_scheduler)
