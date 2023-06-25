@@ -16,7 +16,7 @@ from pycocotools.coco import COCO
 import numpy as np
 import json
 
-def train_one_epoch(model, data_loader, optimizer, device, lr_scheduler = None):
+def train_one_epoch(model, data_loader, optimizer, device, warmup_scheduler = None):
     """
     Trains a given model for one epoch using the provided data loader, criterion, and optimizer.
 
@@ -25,7 +25,7 @@ def train_one_epoch(model, data_loader, optimizer, device, lr_scheduler = None):
         data_loader (DataLoader): The data loader providing the training data.
         optimizer (torch.optim.Optimizer): The optimizer to be used for updating the model's parameters.
         device (torch.device): The device on which the model is running (e.g., 'cpu' or 'cuda').
-        lr_scheduler (torch.optim.lr_scheduler): learning rate scheduler (Default: None)
+        warmup_scheduler (torch.optim.lr_scheduler): warm-up learning rate scheduler (Default: None)
         
     Returns:
         loss_per_epoch(float): The average loss per batch for the entire epoch.
@@ -43,8 +43,8 @@ def train_one_epoch(model, data_loader, optimizer, device, lr_scheduler = None):
         optimizer.zero_grad()
         losses.backward()
         optimizer.step()
-        if lr_scheduler:
-            lr_scheduler.step()
+        if warmup_scheduler is not None:
+            warmup_scheduler.step()
         running_loss += losses.item()
         progress_bar.set_description(desc=f"Loss: {losses.item():.4f}")
     loss_per_epoch = running_loss / len(data_loader)
@@ -118,7 +118,14 @@ def train_and_validate_model(model, train_loader, test_loader, optimizer, num_ep
     for e in range(num_epochs):
         start = time.time()
         # train(...)
-        train_per_epoch  = train_one_epoch(model, train_loader, optimizer, device, lr_scheduler)
+        warmup_scheduler = None
+        if e == 0:
+            warmup_iters = min(1000, len(train_loader) - 1)
+            warmup_scheduler = warmup_lr_scheduler(optimizer, warmup_iters)
+        train_per_epoch  = train_one_epoch(model, train_loader, optimizer, device, warmup_scheduler)
+        # update the learning rate if scheduler is implemented
+        if lr_scheduler:
+            lr_scheduler.step()
         # validate(...)
         validate_per_epoch, metric_summary = validate_one_epoch(model, test_loader, device)
         end = time.time()
