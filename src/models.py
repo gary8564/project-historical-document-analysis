@@ -55,7 +55,7 @@ def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_rati
             num_classes=num_classes,
             anchor_generator=anchorGenerator(anchor_sizes, aspect_ratios),
         )
-        print(model)
+        #print(model)
         return model.to(device)    
     else:
         model = retinanet_resnet50_fpn_v2(weights=RetinaNet_ResNet50_FPN_V2_Weights.DEFAULT)
@@ -64,7 +64,7 @@ def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_rati
         num_anchors = model.head.classification_head.num_anchors
         # replace the pre-trained head with a new one
         model.head = RetinaNetHead(in_features, num_anchors, num_classes)
-        print(model)
+        #print(model)
         return model.to(device)
         
 def viTBackBone(device):
