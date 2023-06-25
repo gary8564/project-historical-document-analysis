@@ -3,7 +3,6 @@ import os
 import torch
 import torchvision
 import torchvision.transforms.v2 as transforms
-from torch import nn, optim
 torchvision.disable_beta_transforms_warning()
 from torchvision.transforms.v2 import functional as F
 from torchvision import models, datapoints
@@ -13,8 +12,6 @@ import glob
 from PIL import Image
 from collections import defaultdict
 import matplotlib.pyplot as plt
-import numpy as np
-import seaborn as sns
 from pycocotools.coco import COCO
 
 class TexBigDataset(Dataset):
@@ -139,23 +136,6 @@ class TexBigDataset(Dataset):
     
     def get_height_and_width(self, idx):
         return self.annot_data['image'][idx]['height'], self.annot_data['image'][idx]['width']
-
-def warmup_lr_scheduler(optimizer, warmup_iters):
-    """
-    Define a warm-up learning rate sheduler
-    References: 
-        1. https://drive.google.com/drive/folders/1VtJF-zPbXc-V-UDl2bDgWJp05DnKZpQH
-        2. https://towardsdatascience.com/a-visual-guide-to-learning-rate-schedulers-in-pytorch-24bbb262c863
-        3. https://lightning.ai/docs/pytorch/stable/notebooks/course_UvA-DL/05-transformers-and-MH-attention.html
-        4. https://github.com/developer0hye/Learning-Rate-WarmUp
-    Args:
-        optimizer (Optimizer): Wrapped optimizer.
-        warmup_iters: number of iterations for warm-up learning rate.
-    Return: 
-        custom warmup scheduler
-    """
-    warmup_scheduler = optim.lr_scheduler.LinearLR(optimizer, start_factor=0.5, total_iters=warmup_iters)
-    return warmup_scheduler
 
 def collate_fn(batch):
     """
@@ -313,43 +293,6 @@ if __name__ == "__main__":
     print(type(transformed_target), list(transformed_target.keys()))
     print(type(transformed_target["boxes"]), type(transformed_target["labels"]))
     show_bbox_image(transformed_train_sample)    
-    
-    # Plotting cosine warm-up learning rate scheduler
-    # Needed for initializing the lr scheduler
-    p = nn.Parameter(torch.empty(4, 4))
-    epochs = 20
-    batches = 1000
-    total_iters = epochs * batches
-    #optimizer = optim.Adam([p], lr=initial_lr) 
-    optimizer = optim.SGD([p], lr=0.005,
-                          momentum=0.9, weight_decay=0.0005)
-    lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
-                                                   step_size=5,
-                                                   gamma=0.75)
-    sns.set()
-    x = [] 
-    y = []
-    iters = 0
-    for i in range(epochs): 
-        scheduler = None
-        if (i == 0):
-            warmup_iters = 1000
-            scheduler = warmup_lr_scheduler(optimizer, warmup_iters)
-        for j in range(batches):
-            iters += 1
-            optimizer.step() 
-            x.append(iters) 
-            y.append(optimizer.param_groups[0]['lr'])
-            if scheduler is not None:
-                scheduler.step()
-        lr_scheduler.step()
-    plt.figure(figsize=(10, 6))
-    plt.plot(x, y)
-    plt.ylabel("Learning rate")
-    plt.xlabel("Iterations (in batches)")
-    plt.title("Cosine Warm-up Learning Rate Scheduler")
-    plt.show()
-    sns.reset_orig()
     
 
     
