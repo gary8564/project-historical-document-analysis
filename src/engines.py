@@ -16,7 +16,6 @@ from pycocotools.cocoeval import COCOeval
 from pycocotools.coco import COCO
 import numpy as np
 import json
-import seaborn as sns
 
 def train_one_epoch(model, data_loader, optimizer, device, warmup_scheduler = None):
     """
@@ -227,41 +226,3 @@ def warmup_lr_scheduler(optimizer, warmup_iters):
     """
     warmup_scheduler = optim.lr_scheduler.LinearLR(optimizer, start_factor=0.5, total_iters=warmup_iters)
     return warmup_scheduler
-
-if __name__ == "__main__":
-     # Plotting cosine warm-up learning rate scheduler
-    # Needed for initializing the lr scheduler
-    p = nn.Parameter(torch.empty(4, 4))
-    epochs = 20
-    batches = 1000
-    total_iters = epochs * batches
-    #optimizer = optim.Adam([p], lr=initial_lr) 
-    optimizer = optim.SGD([p], lr=0.005,
-                          momentum=0.9, weight_decay=0.0005)
-    lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
-                                                   step_size=5,
-                                                   gamma=0.75)
-    sns.set()
-    x = [] 
-    y = []
-    iters = 0
-    for i in range(epochs): 
-        scheduler = None
-        if (i == 0):
-            warmup_iters = 1000
-            scheduler = warmup_lr_scheduler(optimizer, warmup_iters)
-        for j in range(batches):
-            iters += 1
-            optimizer.step() 
-            x.append(iters) 
-            y.append(optimizer.param_groups[0]['lr'])
-            if scheduler is not None:
-                scheduler.step()
-        lr_scheduler.step()
-    plt.figure(figsize=(10, 6))
-    plt.plot(x, y)
-    plt.ylabel("Learning rate")
-    plt.xlabel("Iterations (in batches)")
-    plt.title("Cosine Warm-up Learning Rate Scheduler")
-    plt.show()
-    sns.reset_orig()

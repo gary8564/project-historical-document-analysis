@@ -4,6 +4,7 @@ import torch
 import torchvision
 import torchvision.transforms.v2 as transforms
 torchvision.disable_beta_transforms_warning()
+from torch import nn, optim
 from torchvision.transforms.v2 import functional as F
 from torchvision import models, datapoints
 from torchvision.utils import draw_bounding_boxes
@@ -12,6 +13,7 @@ import glob
 from PIL import Image
 from collections import defaultdict
 import matplotlib.pyplot as plt
+import seaborn as sns
 from pycocotools.coco import COCO
 
 class TexBigDataset(Dataset):
@@ -272,6 +274,7 @@ def freeze_layers(model, frozen_layers):
     return model
     
 if __name__ == "__main__":
+    from engines import warmup_lr_scheduler
     # Loading dataset
     train_img_path = "../archive"
     train_annot_filename = "train"
@@ -293,6 +296,43 @@ if __name__ == "__main__":
     print(type(transformed_target), list(transformed_target.keys()))
     print(type(transformed_target["boxes"]), type(transformed_target["labels"]))
     show_bbox_image(transformed_train_sample)    
+    
+    # Plotting cosine warm-up learning rate scheduler
+    # Needed for initializing the lr scheduler
+    p = nn.Parameter(torch.empty(4, 4))
+    epochs = 20
+    batches = 1000
+    total_iters = epochs * batches
+    #optimizer = optim.Adam([p], lr=initial_lr) 
+    optimizer = optim.SGD([p], lr=0.005,
+                          momentum=0.9, weight_decay=0.0005)
+    lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
+                                                   step_size=5,
+                                                   gamma=0.75)
+    sns.set()
+    x = [] 
+    y = []
+    iters = 0
+    for i in range(epochs): 
+        scheduler = None
+        if (i == 0):
+            warmup_iters = 1000
+            scheduler = warmup_lr_scheduler(optimizer, warmup_iters)
+        for j in range(batches):
+            iters += 1
+            optimizer.step() 
+            x.append(iters) 
+            y.append(optimizer.param_groups[0]['lr'])
+            if scheduler is not None:
+                scheduler.step()
+        lr_scheduler.step()
+    plt.figure(figsize=(10, 6))
+    plt.plot(x, y)
+    plt.ylabel("Learning rate")
+    plt.xlabel("Iterations (in batches)")
+    plt.title("Linearly Warm-up Step Decay Learning Rate Scheduler")
+    plt.show()
+    sns.reset_orig()
     
 
     
