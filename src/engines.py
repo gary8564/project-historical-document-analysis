@@ -47,7 +47,7 @@ def train_one_epoch(model, data_loader, optimizer, device, warmup_scheduler = No
         if warmup_scheduler is not None:
             warmup_scheduler.step()
         running_loss += losses.item()
-        progress_bar.set_description(desc=f"Loss: {losses.item():.4f}")
+        progress_bar.set_description(desc=f"Loss: {losses.item():.4f}, lr: {optimizer.param_groups[0]['lr']:.4f}")
     loss_per_epoch = running_loss / len(data_loader)
     return loss_per_epoch
 
