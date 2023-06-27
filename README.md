@@ -45,14 +45,12 @@ From the above analysis, most of the aspect ratios are in the range of 0.1 to 0.
 ## Installation
 Install the repository in editable mode. Example for MacOS/Linux(Ubuntu):
 
-    ```
     python3 -m venv dlcv_final_project  
     source dlcv_final_project/bin/activate  
     pip3 install torch torchvision
     pip install pycocotools
     pip install torchmetrics
     pip install -e .  
-    ```
 
 ## Usage
 
