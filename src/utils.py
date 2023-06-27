@@ -15,6 +15,9 @@ from collections import defaultdict
 import matplotlib.pyplot as plt
 import seaborn as sns
 from pycocotools.coco import COCO
+import numpy as np
+import cv2
+import pandas as pd
 
 class TexBigDataset(Dataset):
     """
@@ -205,6 +208,20 @@ def show_bbox_image(data_sample):
     fig.tight_layout()
     fig.show()
 
+def draw_predict_bbox(boxes, pred_classes, gt_classes, image):
+    COLORS = np.random.uniform(0, 255, size=(len(gt_classes), 3))
+    for i, box in enumerate(boxes):
+        color = COLORS[gt_classes.index(pred_classes[i])]
+        cv2.rectangle(image, 
+                      (int(box[0]), int(box[1])),
+                      (int(box[2]), int(box[3])),
+                      color, 2
+        )
+        cv2.putText(image, pred_classes[i], (int(box[0]), int(box[1]-5)),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2, 
+                    lineType=cv2.LINE_AA)
+    return image
+
 def prepare_for_evaluation(predictions):
     coco_results = []
     for original_id, prediction in predictions.items():
@@ -229,6 +246,31 @@ def prepare_for_evaluation(predictions):
             ]
         )
     return coco_results
+
+def predict(image, model, device, detection_threshold, classes, save_filename):
+    # Create a BGR copy of the image for annotation.
+    image_bgr = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+    # transform the image to tensor
+    test_transform = get_transform(moreAugmentations=False)
+    image = test_transform(image).to(device)
+    image = image.unsqueeze(0) # add a batch dimension
+    with torch.no_grad():
+        outputs = model(image) # get the predictions on the image
+    outputs = [{k: v.to('cpu') for k, v in t.items()} for t in outputs]
+    if len(outputs[0]['boxes']) != 0:
+        boxes = outputs[0]['boxes'].data.numpy()
+        # get all the scores
+        scores = outputs[0]['scores'].data.numpy()
+        # filter out boxes according to `detection_threshold`
+        boxes = boxes[scores >= detection_threshold].astype(np.int32)
+        draw_boxes = boxes.copy()
+        # get all the predicited class names
+        pred_classes = [classes[i] for i in outputs[0]['labels'].cpu().numpy()]
+        result = draw_predict_bbox(boxes, pred_classes, classes, image_bgr)
+        cv2.imshow('Prediction', result)
+        cv2.waitKey(10) 
+        cv2.imwrite(f"../images/{save_filename}.png", result)
+        print("Predicted image saved!")
 
 def load_pretrained_weights(model, weights_path, device):
     """
@@ -272,6 +314,41 @@ def freeze_layers(model, frozen_layers):
         if param.requires_grad:
             print(name)
     return model
+
+def aspectRatioStats(annot_filename):
+    """
+    Compute the statistical information of the distribution of bounding boxes' aspect ratios in the dataset
+    
+    Args:
+        annot_filename (str): jsonl fileaname of annotation in COCO format
+    Return:
+        statistical summary of widths, heighst, and aspect ratios.
+        histogram plot.
+    """
+    with open(annot_filename, "r") as read_file:
+        annot_data = json.load(read_file)
+    annots = annot_data['annotations']
+    ar_dict = {"width": [], "height": [], "aspect_ratio": []}
+    for i, annot in enumerate(annots):
+        bbox = annot['bbox'] 
+        w = bbox[2]
+        h = bbox[3]
+        ar = h / w
+        ar_dict["width"].append(w)
+        ar_dict["height"].append(h)
+        ar_dict["aspect_ratio"].append(ar)
+    df = pd.DataFrame.from_dict(ar_dict)
+    df_ar = df["aspect_ratio"]
+    df_ar_adjusted = df_ar[df_ar.between(df_ar.quantile(.25), df_ar.quantile(.75))]
+    sns.set()
+    plt.figure()
+    plt.hist(df_ar_adjusted, bins=20)
+    plt.title("Distribution of aspect ratios of bounding boxes between Q1 and Q3")
+    plt.xlabel("aspect ratio")
+    plt.show()
+    sns.reset_orig()
+    return df_ar.describe()
+        
     
 if __name__ == "__main__":
     from engines import warmup_lr_scheduler
@@ -295,8 +372,47 @@ if __name__ == "__main__":
     print(type(transformed_image))
     print(type(transformed_target), list(transformed_target.keys()))
     print(type(transformed_target["boxes"]), type(transformed_target["labels"]))
-    show_bbox_image(transformed_train_sample)    
+    show_bbox_image(transformed_train_sample)
     
+    # Test data bounding box
+    CLASSES = [
+        'background', 'Advertisement', 'Author', 'Caption', 'Column title', 'Decoration', 
+        'Editorial note', 'Equation', 'Footer', 'Footnote', 'Frame', 'Header', 'Heading', 
+        'Image', 'Logo', 'Noise', 'Page Number', 'Paragraph', 'Sub-heading', 'Table'
+    ]
+    annot_filename = 'val'
+    test = TexBigDataset(train_img_path, annot_filename)
+    summary = aspectRatioStats(test.annot_path)
+    print(summary)
+    '''
+    with open(test.annot_path, "r") as read_file:
+        annot_data = json.load(read_file)
+    img_path = '../archive/val/14688302_1881_Seite_002.tiff'
+    filename = img_path.split('/')[-1]
+    image = Image.open(img_path).convert('RGB')
+    image_bgr = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+    images = annot_data['images']
+    annots = annot_data['annotations']
+    index = 0
+    for i, img in enumerate(images):
+        if (img['file_name'] == filename):
+            index = img['id']
+    for i, annot in enumerate(annots):
+        if (annot['image_id'] == index):
+            bbox = annot['bbox'] 
+            label = CLASSES[annot['category_id']]
+            cv2.rectangle(
+                image_bgr, 
+                (int(bbox[0]), int(bbox[1])), (int(bbox[0]) + int(bbox[2]), int(bbox[1]) + int(bbox[3])),
+                (0, 255, 0), 1
+            )
+            cv2.putText(
+                image_bgr, label, (int(bbox[0]), int(bbox[1]-5)), 
+                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2
+            )
+            cv2.imshow('Ground-truth', image_bgr)
+            cv2.waitKey(0)
+        
     # Plotting cosine warm-up learning rate scheduler
     # Needed for initializing the lr scheduler
     p = nn.Parameter(torch.empty(4, 4))
@@ -333,6 +449,6 @@ if __name__ == "__main__":
     plt.title("Linearly Warm-up Step Decay Learning Rate Scheduler")
     plt.show()
     sns.reset_orig()
-    
+    '''
 
     

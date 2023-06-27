@@ -172,3 +172,7 @@ archive/
 # pretrained models
 pretrained/
 *.pt
+
+# images
+images/
+*.png

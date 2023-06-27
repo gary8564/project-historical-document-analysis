@@ -21,8 +21,8 @@ dependencies = [
     "pandas", 
     "scipy",
     "tqdm",
+    "opencv-python",
     "scikit-learn",
     "seaborn",
-    "torchsummary",
     "pytest" 
 ]

@@ -114,11 +114,26 @@ def roIPooler():
     )
     return roi_pooler
 
+def get_model(device='cpu', model_name='baseline'):
+    anchor_sizes = tuple((x, int(x * 2 ** (1.0 / 3)), int(x * 2 ** (2.0 / 3))) for x in [16, 32, 64, 128, 256]) 
+    aspect_ratios=((0.33, 0.5, 1.0, 1.33, 2.0),) * len(anchor_sizes) 
+    if model_name == 'baseline':
+        model = retinaNet(num_classes=20, device=device, anchor_sizes=anchor_sizes, aspect_ratios=aspect_ratios)
+    elif model_name == 'ViT backbone':
+        model = retinaNet(num_classes=20, device=device, backbone="ViT", anchor_sizes=anchor_sizes, aspect_ratios=aspect_ratios)
+    else:
+        model = retinaNet(num_classes=20, device=device, backbone="SwinT", anchor_sizes=anchor_sizes, aspect_ratios=aspect_ratios)
+    model = model.eval().to(device)
+    return model
 
 
 if __name__ == "__main__":
+    from utils import freeze_layers
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     backbone = "ResNet_FPN"
     anchor_sizes = tuple((x, int(x * 2 ** (1.0 / 3)), int(x * 2 ** (2.0 / 3))) for x in [16, 32, 64, 128, 256])
     aspect_ratios=((0.33, 0.5, 1.0, 1.33, 2.0),) * len(anchor_sizes)
-    model = retinaNet(num_classes=20, device=device, backbone=None, anchor_sizes=anchor_sizes, aspect_ratios=aspect_ratios)
+    model = retinaNet(num_classes=20, device=device, backbone="ViT", anchor_sizes=anchor_sizes, aspect_ratios=aspect_ratios)
+    frozen_layers = ["backbone.1"] 
+    model = freeze_layers(model, frozen_layers)
+    print(model)
