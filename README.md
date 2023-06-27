@@ -38,7 +38,7 @@ To fine-tune the aspect ratios of anchor boxes, the distribution of the aspect r
 | 50%           | 0.24          |
 | 75%           | 0.86          |
 
-![histogram](./images/texBig_aspectRatioHist.png)
+![texBig_aspectRatioHist](https://github.com/BUW-CV/final-project-gary8564/assets/54540162/d56d722e-79ec-42d1-b3d8-1499ad4460bd)
 
 From the above analysis, most of the aspect ratios are in the range of 0.1 to 0.2. Therefore, in the later fine-tuning experiments, the smaller aspect ratios of anchor boxes are targeted. 
 
