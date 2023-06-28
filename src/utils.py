@@ -192,11 +192,9 @@ def get_transform(moreAugmentations, backbone=None):
         if backbone == "vit":
             transformList.append(transforms.Resize(256))
             transformList.append(transforms.RandomCrop(224))
-            transformList.append(transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]))
         else:
             transformList.append(transforms.Resize(272))
             transformList.append(transforms.RandomCrop(256))
-            transformList.append(transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]))
     if moreAugmentations:
         transformList.append(transforms.RandomPhotometricDistort())
         transformList.append(transforms.RandomZoomOut(
