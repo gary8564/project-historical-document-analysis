@@ -76,9 +76,13 @@ def viTBackBone(device):
     pretrained_vit = torchvision.models.vit_b_16(weights=pretrained_vit_weights).to(device)
     # print(pretrained_vit)
     # Load the pretrained ViT backbone.
+    class_token = pretrained_vit.pretrained_vit
     conv_proj = pretrained_vit.conv_proj
+    print(class_token)
+    print(pretrained_vit.seq_length)
+    print(conv_proj)
     encoder = pretrained_vit.encoder
-    backbone = nn.Sequential(conv_proj, encoder)
+    backbone = nn.Sequential(class_token, conv_proj, encoder)
     # Retinanet needs to know the number of output channels in a backbone.
     # For vit_b_16, it's 768
     backbone.out_channels = 768
@@ -136,5 +140,5 @@ if __name__ == "__main__":
     aspect_ratios=((0.33, 0.5, 1.0, 1.33, 2.0),) * len(anchor_sizes)
     model = retinaNet(num_classes=20, device=device, backbone=backbone, anchor_sizes=anchor_sizes, aspect_ratios=aspect_ratios)
     frozen_layers = ["backbone.1"] 
-    model = freeze_layers(model, frozen_layers)
+    model = freeze_layers(model, frozen_layers) 
     print(model)
