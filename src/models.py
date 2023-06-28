@@ -78,11 +78,13 @@ def viTBackBone(device):
     # Load the pretrained ViT backbone.
     class_token = pretrained_vit.class_token
     conv_proj = pretrained_vit.conv_proj
-    print(class_token)
     print(pretrained_vit.seq_length)
+    print(pretrained_vit.hidden_dim)
+    print(pretrained_vit.patch_size)
+    print(pretrained_vit.image_size)
     print(conv_proj)
     encoder = pretrained_vit.encoder
-    backbone = nn.Sequential(class_token, conv_proj, encoder)
+    backbone = nn.Sequential(conv_proj, encoder)
     # Retinanet needs to know the number of output channels in a backbone.
     # For vit_b_16, it's 768
     backbone.out_channels = 768
