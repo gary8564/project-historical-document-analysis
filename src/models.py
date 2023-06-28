@@ -82,6 +82,7 @@ def viTBackBone(device):
     print(pretrained_vit.hidden_dim)
     print(pretrained_vit.patch_size)
     print(pretrained_vit.image_size)
+    print(class_token.size)
     print(conv_proj)
     encoder = pretrained_vit.encoder
     backbone = nn.Sequential(conv_proj, encoder)
