@@ -168,7 +168,7 @@ def get_pretrained_model_transform(pretrained_model_weights):
     pretrained_model_transforms= pretrained_model_weights.transforms()
     return pretrained_model_transforms
 
-def get_transform(moreAugmentations, isTransformersBackbone=False):
+def get_transform(moreAugmentations, backbone=None):
     """
     define the transforms for data augmentation
 
@@ -176,9 +176,10 @@ def get_transform(moreAugmentations, isTransformersBackbone=False):
     ----------
     moreAugmentations : boolean
         If true, more data transformations are operated to avoid overfitting.
-    isTransformersBackbone : boolean
-        If true, resize the image to 224. Default: fase.
-
+        
+    backbone : str
+        [None, "vit", "swint"]. By default, None(pretrained ResNet50_FPN).
+        
     Returns
     -------
     Pytorch transformers
@@ -186,8 +187,16 @@ def get_transform(moreAugmentations, isTransformersBackbone=False):
     transformList = []
     transformList.append(transforms.PILToTensor())
     transformList.append(transforms.ConvertImageDtype(torch.float32))
-    if isTransformersBackbone:
-        transformList.append(transforms.RandomCrop(224))
+    if backbone:
+        assert backbone in ["vit", "swint"]
+        if backbone == "vit":
+            pretrained_vit_weights = torchvision.models.ViT_B_16_Weights.DEFAULT 
+            pretrained_vit_transforms = pretrained_vit_weights.transforms()
+            transformList.append(pretrained_vit_transforms)
+        else:
+            pretrained_swin_weights = torchvision.models.Swin_V2_B_Weights.DEFAULT 
+            pretrained_swin_transforms = pretrained_swin_weights.transforms()
+            transformList.append(pretrained_swin_transforms)
     if moreAugmentations:
         transformList.append(transforms.RandomPhotometricDistort())
         transformList.append(transforms.RandomZoomOut(

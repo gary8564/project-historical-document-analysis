@@ -101,7 +101,6 @@ def anchorGenerator(anchor_sizes, aspect_ratios):
     anchor_generator = AnchorGenerator(anchor_sizes, aspect_ratios)
     return anchor_generator
     
-    
 def roIPooler():
     # Feature maps to perform RoI cropping.
     # If backbone returns a Tensor, `featmap_names` is expected to be [0]. 
