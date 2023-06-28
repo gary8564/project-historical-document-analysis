@@ -6,6 +6,8 @@ from torchvision.models.detection.retinanet import RetinaNet, RetinaNetHead, Ret
 from torchvision.models.detection.rpn import AnchorGenerator
 from torchvision.models.detection.backbone_utils import resnet_fpn_backbone
 from torchvision.ops.feature_pyramid_network import LastLevelP6P7
+from torchvision.models.feature_extraction import create_feature_extractor
+from torchvision.models.feature_extraction import get_graph_node_names
 
 def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_ratios=None):
     """
@@ -74,18 +76,17 @@ def viTBackBone(device):
     pretrained_vit_weights = torchvision.models.ViT_B_16_Weights.DEFAULT 
     # Setup a ViT model instance with pretrained weights
     pretrained_vit = torchvision.models.vit_b_16(weights=pretrained_vit_weights).to(device)
-    # print(pretrained_vit)
+    #print(pretrained_vit)
+    #print(get_graph_node_names(pretrained_vit))
+    train_nodes, eval_nodes = get_graph_node_names(pretrained_vit)
     # Load the pretrained ViT backbone.
-    class_token = pretrained_vit.class_token
-    conv_proj = pretrained_vit.conv_proj
-    print(pretrained_vit.seq_length)
-    print(pretrained_vit.hidden_dim)
-    print(pretrained_vit.patch_size)
-    print(pretrained_vit.image_size)
-    print(class_token.size)
-    print(conv_proj)
-    encoder = pretrained_vit.encoder
-    backbone = nn.Sequential(conv_proj, encoder)
+    feature_extractor = create_feature_extractor(pretrained_vit, 
+                                                 return_nodes=train_nodes[:-1])
+    #class_token = pretrained_vit.class_token
+    #conv_proj = pretrained_vit.conv_proj
+    #encoder = pretrained_vit.encoder
+    #backbone = nn.Sequential(conv_proj, encoder)
+    backbone = feature_extractor
     # Retinanet needs to know the number of output channels in a backbone.
     # For vit_b_16, it's 768
     backbone.out_channels = 768
