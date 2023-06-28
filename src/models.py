@@ -76,7 +76,7 @@ def viTBackBone(device):
     pretrained_vit = torchvision.models.vit_b_16(weights=pretrained_vit_weights).to(device)
     # print(pretrained_vit)
     # Load the pretrained ViT backbone.
-    class_token = pretrained_vit.pretrained_vit
+    class_token = pretrained_vit.class_token
     conv_proj = pretrained_vit.conv_proj
     print(class_token)
     print(pretrained_vit.seq_length)
