@@ -190,13 +190,13 @@ def get_transform(moreAugmentations, backbone=None):
     if backbone:
         assert backbone in ["vit", "swint"]
         if backbone == "vit":
-            pretrained_vit_weights = torchvision.models.ViT_B_16_Weights.DEFAULT 
-            pretrained_vit_transforms = pretrained_vit_weights.transforms()
-            transformList.append(pretrained_vit_transforms)
+            transformList.append(transforms.Resize(256))
+            transformList.append(transforms.RandomCrop(224))
+            transformList.append(transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]))
         else:
-            pretrained_swin_weights = torchvision.models.Swin_V2_B_Weights.DEFAULT 
-            pretrained_swin_transforms = pretrained_swin_weights.transforms()
-            transformList.append(pretrained_swin_transforms)
+            transformList.append(transforms.Resize(272))
+            transformList.append(transforms.RandomCrop(256))
+            transformList.append(transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]))
     if moreAugmentations:
         transformList.append(transforms.RandomPhotometricDistort())
         transformList.append(transforms.RandomZoomOut(
