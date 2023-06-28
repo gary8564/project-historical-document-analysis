@@ -190,11 +190,9 @@ def get_transform(moreAugmentations, backbone=None):
     if backbone:
         assert backbone in ["vit", "swint"]
         if backbone == "vit":
-            transformList.append(transforms.Resize(256))
-            transformList.append(transforms.RandomCrop(224))
+            transformList.append(transforms.Resize(224))
         else:
-            transformList.append(transforms.Resize(272))
-            transformList.append(transforms.RandomCrop(256))
+            transformList.append(transforms.Resize(256))
     if moreAugmentations:
         transformList.append(transforms.RandomPhotometricDistort())
         transformList.append(transforms.RandomZoomOut(
