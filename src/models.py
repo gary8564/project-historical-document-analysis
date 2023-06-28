@@ -5,6 +5,7 @@ from torchvision.models import ResNet50_Weights, ResNeXt101_32X8D_Weights
 from torchvision.models.detection.retinanet import RetinaNet, RetinaNetHead, RetinaNet_ResNet50_FPN_V2_Weights, retinanet_resnet50_fpn_v2
 from torchvision.models.detection.rpn import AnchorGenerator
 from torchvision.models.detection.backbone_utils import resnet_fpn_backbone
+from torchvision.ops.feature_pyramid_network import LastLevelP6P7
 
 def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_ratios=None):
     """
@@ -33,17 +34,18 @@ def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_rati
         RetinaNet training model 
     """
     if any(item is not None for item in [backbone, anchor_sizes, aspect_ratios]):
-        backboneModel = resnet_fpn_backbone('resnet50', weights=ResNet50_Weights.DEFAULT)
+        backboneModel = resnet_fpn_backbone('resnet50', weights=ResNet50_Weights.DEFAULT, 
+                                            returned_layers=[2, 3, 4], extra_blocks=LastLevelP6P7(256, 256))
         anchor_sizes = tuple((x, int(x * 2 ** (1.0 / 3)), int(x * 2 ** (2.0 / 3))) for x in [32, 64, 128, 256, 512])
         aspect_ratios = ((0.5, 1.0, 2.0),) * len(anchor_sizes) 
         if backbone:
             assert backbone in ["ResNet_FPN", "ViT", "SwinT"]
+            backboneModel = resnet_fpn_backbone('resnext101_32x8d', weights=ResNeXt101_32X8D_Weights.DEFAULT,
+                                                 returned_layers=[2, 3, 4], extra_blocks=LastLevelP6P7(256, 256))
             if (backbone == "ViT"):
-                backboneModel = viTBackBone(device)
+                backboneModel.body = viTBackBone(device)
             elif (backbone == "SwinT"):
-                backboneModel = swinTBackBone(device)
-            else:
-                backboneModel = resnet_fpn_backbone('resnext101_32x8d', weights=ResNeXt101_32X8D_Weights.DEFAUL)
+                backboneModel.body = swinTBackBone(device)
         if anchor_sizes and aspect_ratios:
             pass
         elif anchor_sizes:
@@ -129,10 +131,10 @@ def get_model(device='cpu', model_name='baseline'):
 if __name__ == "__main__":
     from utils import freeze_layers
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    backbone = "ResNet_FPN"
+    backbone = "ViT"
     anchor_sizes = tuple((x, int(x * 2 ** (1.0 / 3)), int(x * 2 ** (2.0 / 3))) for x in [16, 32, 64, 128, 256])
     aspect_ratios=((0.33, 0.5, 1.0, 1.33, 2.0),) * len(anchor_sizes)
-    model = retinaNet(num_classes=20, device=device, backbone="ViT", anchor_sizes=anchor_sizes, aspect_ratios=aspect_ratios)
+    model = retinaNet(num_classes=20, device=device, backbone=backbone, anchor_sizes=anchor_sizes, aspect_ratios=aspect_ratios)
     frozen_layers = ["backbone.1"] 
     model = freeze_layers(model, frozen_layers)
     print(model)
