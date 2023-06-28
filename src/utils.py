@@ -168,7 +168,7 @@ def get_pretrained_model_transform(pretrained_model_weights):
     pretrained_model_transforms= pretrained_model_weights.transforms()
     return pretrained_model_transforms
 
-def get_transform(moreAugmentations):
+def get_transform(moreAugmentations, isTransformersBackbone=False):
     """
     define the transforms for data augmentation
 
@@ -176,6 +176,8 @@ def get_transform(moreAugmentations):
     ----------
     moreAugmentations : boolean
         If true, more data transformations are operated to avoid overfitting.
+    isTransformersBackbone : boolean
+        If true, resize the image to 224. Default: fase.
 
     Returns
     -------
@@ -184,6 +186,8 @@ def get_transform(moreAugmentations):
     transformList = []
     transformList.append(transforms.PILToTensor())
     transformList.append(transforms.ConvertImageDtype(torch.float32))
+    if isTransformersBackbone:
+        transformList.append(transforms.RandomCrop(224))
     if moreAugmentations:
         transformList.append(transforms.RandomPhotometricDistort())
         transformList.append(transforms.RandomZoomOut(
