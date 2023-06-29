@@ -37,7 +37,7 @@ class ViT(torch.nn.Module):
         batch_class_token = self.vit.class_token.expand(x.shape[0], -1, -1)
         x = torch.cat([batch_class_token, x], dim=1)
         x = self.vit.encoder(x)
-        return x[:, 0]
+        return x
 
 class SwinT(torch.nn.Module):
     def __init__(self, device):
