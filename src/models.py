@@ -95,27 +95,33 @@ def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_rati
     if any(item is not None for item in [backbone, anchor_sizes, aspect_ratios]):
         backboneModel = resnet_fpn_backbone('resnet50', weights=ResNet50_Weights.DEFAULT, 
                                             returned_layers=[2, 3, 4], extra_blocks=LastLevelP6P7(256, 256))
-        anchor_sizes = tuple((x, int(x * 2 ** (1.0 / 3)), int(x * 2 ** (2.0 / 3))) for x in [32, 64, 128, 256, 512])
-        aspect_ratios = ((0.5, 1.0, 2.0),) * len(anchor_sizes)
+        anchorSizes = tuple((x, int(x * 2 ** (1.0 / 3)), int(x * 2 ** (2.0 / 3))) for x in [32, 64, 128, 256, 512])
+        aspectRatios = ((0.5, 1.0, 2.0),) * len(anchor_sizes)
+        
         if backbone:
             assert backbone in ["ResNet_FPN", "ViT", "SwinT"]
             if (backbone == "ViT"):
                 backboneModel = ViT(device)
+                anchorSizes = ((32, 64, 128, 256, 512),)
+                aspectRatios = ((0.5, 1.0, 2.0),)
             elif (backbone == "SwinT"):
                 backboneModel = SwinT(device)
+                anchorSizes = ((32, 64, 128, 256, 512),)
+                aspectRatios = ((0.5, 1.0, 2.0),)
             else:
                 backboneModel = resnet_fpn_backbone('resnext101_32x8d', weights=ResNeXt101_32X8D_Weights.DEFAULT,
                                                     returned_layers=[2, 3, 4], extra_blocks=LastLevelP6P7(256, 256))
-        if anchor_sizes and aspect_ratios:
-            pass
-        elif anchor_sizes:
-            aspect_ratios = ((0.5, 1.0, 2.0),) * len(anchor_sizes) 
-        elif aspect_ratios:
-            anchor_sizes = tuple((x, int(x * 2 ** (1.0 / 3)), int(x * 2 ** (2.0 / 3))) for x in [32, 64, 128, 256, 512])
+        
+        if anchor_sizes:
+            anchorSizes = anchor_sizes
+            
+        if aspect_ratios: 
+            aspectRatios = aspect_ratios
+            
         model = RetinaNet(
             backbone=backboneModel,
             num_classes=num_classes,
-            anchor_generator=anchorGenerator(anchor_sizes, aspect_ratios),
+            anchor_generator=anchorGenerator(anchorSizes, aspectRatios),
         )
         if backbone == "ViT":
             model.transform = GeneralizedRCNNTransform(min_size=224, max_size=256, image_mean=[0.485, 0.456, 0.406], 
