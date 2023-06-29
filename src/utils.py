@@ -176,7 +176,7 @@ def get_transform(moreAugmentations, backbone=None):
     ----------
     moreAugmentations : boolean
         If true, more data transformations are operated to avoid overfitting.
-        
+                
     Returns
     -------
     Pytorch transformers
