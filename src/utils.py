@@ -200,7 +200,8 @@ def get_transform(moreAugmentations, backbone=None):
         transformList.append(transforms.RandomHorizontalFlip())
         transformList.append(transforms.ColorJitter(contrast=0.5))
         transformList.append(transforms.RandomRotation([-15,15]))
-        #transformList.append(transforms.SanitizeBoundingBox())
+    if backbone or moreAugmentations:
+        transformList.append(transforms.SanitizeBoundingBox())
     transformList.append(transforms.PILToTensor())
     transformList.append(transforms.ConvertImageDtype(torch.float32))
     return transforms.Compose(transformList)
