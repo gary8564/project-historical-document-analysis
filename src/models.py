@@ -103,11 +103,11 @@ def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_rati
             assert backbone in ["ResNet_FPN", "ViT", "SwinT"]
             if (backbone == "ViT"):
                 backboneModel = ViTWithFPN(device)
-                min_size = 100
+                min_size = 224
                 max_size = 224
             elif (backbone == "SwinT"):
                 backboneModel = SwinTWithFPN(device)
-                min_size = 100
+                min_size = 256
                 max_size = 256
             else:
                 backboneModel = resnet_fpn_backbone('resnext101_32x8d', weights=ResNeXt101_32X8D_Weights.DEFAULT,
