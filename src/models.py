@@ -143,7 +143,7 @@ def pretrained_ViT(device):
     #print(pretrained_vit)
     #print(get_graph_node_names(pretrained_vit))
     train_nodes, eval_nodes = get_graph_node_names(pretrained_vit)
-    backbone = create_feature_extractor(pretrained_vit, return_nodes=train_nodes[:-1])
+    backbone = create_feature_extractor(pretrained_vit, return_nodes={"encoder.ln":"getitem_5"})
     backbone.out_channels = 768
     return backbone
 
