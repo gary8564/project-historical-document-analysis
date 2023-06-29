@@ -4,15 +4,15 @@ from torch import nn
 from torchvision.models import ResNet50_Weights, ResNeXt101_32X8D_Weights
 from torchvision.models.detection.retinanet import RetinaNet, RetinaNetHead, RetinaNet_ResNet50_FPN_V2_Weights, retinanet_resnet50_fpn_v2
 from torchvision.models.detection.rpn import AnchorGenerator
-from torchvision.models.detection.backbone_utils import resnet_fpn_backbone
+from torchvision.models.detection.backbone_utils import resnet_fpn_backbone, BackboneWithFPN
 from torchvision.ops import FeaturePyramidNetwork
 from torchvision.ops.feature_pyramid_network import LastLevelP6P7
 from torchvision.models.feature_extraction import create_feature_extractor
 from torchvision.models.feature_extraction import get_graph_node_names
 from torchvision.models.detection.transform import GeneralizedRCNNTransform
-class ViTWithFPN(torch.nn.Module):
+class ViT(torch.nn.Module):
     def __init__(self, device):
-        super(ViTWithFPN, self).__init__()
+        super(ViT, self).__init__()
         self.device = device
         # Get a ViT backbone
         self.vit = pretrained_ViT(device)
@@ -37,12 +37,11 @@ class ViTWithFPN(torch.nn.Module):
         batch_class_token = self.vit.class_token.expand(x.shape[0], -1, -1)
         x = torch.cat([batch_class_token, x], dim=1)
         x = self.vit.encoder(x)
-        x = self.fpn(x)
-        return x
+        return x[:, 0]
 
-class SwinTWithFPN(torch.nn.Module):
+class SwinT(torch.nn.Module):
     def __init__(self, device):
-        super(SwinTWithFPN, self).__init__()
+        super(SwinT, self).__init__()
         self.device = device
         # Get a ViT backbone
         self.swint = pretrained_swinT(device)
@@ -62,7 +61,6 @@ class SwinTWithFPN(torch.nn.Module):
 
     def forward(self, x):
         x = self.body(x)
-        x = self.fpn(x)
         return x
 
 def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_ratios=None):
@@ -99,9 +97,13 @@ def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_rati
         if backbone:
             assert backbone in ["ResNet_FPN", "ViT", "SwinT"]
             if (backbone == "ViT"):
-                backboneModel = ViTWithFPN(device)
+                return_layers = {'vit': 'body'}
+                in_channels_list = [768] * 3
+                backboneModel = BackboneWithFPN(backbone=ViT(device), return_layers=return_layers, in_channels_list=in_channels_list, out_channels=256)
             elif (backbone == "SwinT"):
-                backboneModel = SwinTWithFPN(device)
+                return_layers = {'swint': 'body'}
+                in_channels_list = [1024] * 3
+                backboneModel = BackboneWithFPN(backbone=SwinT(device), return_layers=return_layers, in_channels_list=in_channels_list, out_channels=256)
             else:
                 backboneModel = resnet_fpn_backbone('resnext101_32x8d', weights=ResNeXt101_32X8D_Weights.DEFAULT,
                                                     returned_layers=[2, 3, 4], extra_blocks=LastLevelP6P7(256, 256))
@@ -185,10 +187,10 @@ def get_model(device='cpu', model_name='baseline'):
 if __name__ == "__main__":
     from utils import freeze_layers
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    backbone = "ViT"
+    backbone = "SwinT"
     anchor_sizes = tuple((x, int(x * 2 ** (1.0 / 3)), int(x * 2 ** (2.0 / 3))) for x in [16, 32, 64, 128, 256])
     aspect_ratios=((0.33, 0.5, 1.0, 1.33, 2.0),) * len(anchor_sizes)
     model = retinaNet(num_classes=20, device=device, backbone=backbone, anchor_sizes=anchor_sizes, aspect_ratios=aspect_ratios)
-    frozen_layers = ["backbone"] 
+    frozen_layers = ["backbone.body"] 
     model = freeze_layers(model, frozen_layers) 
     print(model)
