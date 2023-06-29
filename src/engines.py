@@ -69,6 +69,7 @@ def validate_one_epoch(model, data_loader, device):
     predict = []
     for images, targets in data_loader:
         images = list(image.to(device) for image in images)
+        print(images[0].size)
         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
         with torch.no_grad():
             loss_dict = model(images, targets)
