@@ -181,10 +181,10 @@ def get_model(device='cpu', model_name='baseline'):
 if __name__ == "__main__":
     from utils import freeze_layers
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    backbone = "SwinT"
+    backbone = "ViT"
     anchor_sizes = tuple((x, int(x * 2 ** (1.0 / 3)), int(x * 2 ** (2.0 / 3))) for x in [16, 32, 64, 128, 256])
     aspect_ratios=((0.33, 0.5, 1.0, 1.33, 2.0),) * len(anchor_sizes)
     model = retinaNet(num_classes=20, device=device, backbone=backbone, anchor_sizes=anchor_sizes, aspect_ratios=aspect_ratios)
-    frozen_layers = ["backbone.body"] 
-    model = freeze_layers(model, frozen_layers) 
+    #frozen_layers = ["backbone.body"] 
+    #model = freeze_layers(model, frozen_layers) 
     print(model)

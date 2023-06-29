@@ -185,8 +185,6 @@ def get_transform(moreAugmentations, backbone=None):
     Pytorch transformers
     """
     transformList = []
-    transformList.append(transforms.PILToTensor())
-    transformList.append(transforms.ConvertImageDtype(torch.float32))
     if backbone:
         assert backbone in ["vit", "swint"]
         if backbone == "vit":
@@ -203,6 +201,8 @@ def get_transform(moreAugmentations, backbone=None):
         transformList.append(transforms.ColorJitter(contrast=0.5))
         transformList.append(transforms.RandomRotation([-15,15]))
         transformList.append(transforms.SanitizeBoundingBox())
+    transformList.append(transforms.PILToTensor())
+    transformList.append(transforms.ConvertImageDtype(torch.float32))
     return transforms.Compose(transformList)
 
 def show_bbox_image(data_sample):
