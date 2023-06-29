@@ -32,6 +32,7 @@ class ViTWithFPN(torch.nn.Module):
             extra_blocks=LastLevelP6P7(256, 256))
 
     def forward(self, x):
+        print("Image is -->",x.size())
         x = self.vit._process_input(x)
         batch_class_token = self.vit.class_token.expand(x.shape[0], -1, -1)
         x = torch.cat([batch_class_token, x], dim=1)
@@ -100,11 +101,11 @@ def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_rati
         if backbone:
             assert backbone in ["ResNet_FPN", "ViT", "SwinT"]
             if (backbone == "ViT"):
-                backboneModel = pretrained_ViT(device)
+                backboneModel = ViTWithFPN(device)
                 min_size = 224
                 max_size = 224
             elif (backbone == "SwinT"):
-                backboneModel = pretrained_swinT(device)
+                backboneModel = SwinTWithFPN(device)
                 min_size = 256
                 max_size = 256
             else:
@@ -142,10 +143,7 @@ def pretrained_ViT(device):
     pretrained_vit = torchvision.models.vit_b_16(weights=pretrained_vit_weights).to(device)
     #print(pretrained_vit)
     #print(get_graph_node_names(pretrained_vit))
-    train_nodes, eval_nodes = get_graph_node_names(pretrained_vit)
-    backbone = create_feature_extractor(pretrained_vit, return_nodes={"encoder.ln":"getitem_5"})
-    backbone.out_channels = 768
-    return backbone
+    return pretrained_vit
 
 def pretrained_swinT(device):
     # Get pretrained weights for ViT-Base
@@ -153,10 +151,7 @@ def pretrained_swinT(device):
     # Setup a ViT model instance with pretrained weights
     pretrained_swin = torchvision.models.swin_v2_b(weights=pretrained_swin_weights).to(device)
     #print(pretrained_swin)
-    train_nodes, eval_nodes = get_graph_node_names(pretrained_swin)
-    backbone = create_feature_extractor(pretrained_swin, return_nodes=train_nodes[:-3])
-    backbone.out_channels = 1024
-    return backbone
+    return pretrained_swin
 
 def anchorGenerator(anchor_sizes, aspect_ratios):
     # Generate anchors using the RPN. Here, we are using 5x3 anchors.
@@ -192,7 +187,7 @@ def get_model(device='cpu', model_name='baseline'):
 if __name__ == "__main__":
     from utils import freeze_layers
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    backbone = "SwinT"
+    backbone = "ViT"
     anchor_sizes = tuple((x, int(x * 2 ** (1.0 / 3)), int(x * 2 ** (2.0 / 3))) for x in [16, 32, 64, 128, 256])
     aspect_ratios=((0.33, 0.5, 1.0, 1.33, 2.0),) * len(anchor_sizes)
     model = retinaNet(num_classes=20, device=device, backbone=backbone, anchor_sizes=anchor_sizes, aspect_ratios=aspect_ratios)
