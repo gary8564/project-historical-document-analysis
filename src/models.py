@@ -13,7 +13,6 @@ from torchvision.models.detection.transform import GeneralizedRCNNTransform
 class ViT(torch.nn.Module):
     def __init__(self, device):
         super(ViT, self).__init__()
-        self.device = device
         # Get a ViT backbone
         self.vit = pretrained_ViT(device)
         # Dry run to get number of channels for FPN
@@ -33,6 +32,7 @@ class ViT(torch.nn.Module):
         #    extra_blocks=LastLevelP6P7(256, 256))
 
     def forward(self, x):
+        x = x.to(device)
         x = self.vit._process_input(x)
         batch_class_token = self.vit.class_token.expand(x.shape[0], -1, -1)
         x = torch.cat([batch_class_token, x], dim=1)
@@ -43,7 +43,6 @@ class ViT(torch.nn.Module):
 class SwinT(torch.nn.Module):
     def __init__(self, device):
         super(SwinT, self).__init__()
-        self.device = device
         # Get a ViT backbone
         self.swint = pretrained_swinT(device)
         self.body = nn.Sequential(self.swint.features, self.swint.norm, self.swint.permute)
@@ -63,6 +62,7 @@ class SwinT(torch.nn.Module):
         #    extra_blocks=LastLevelP6P7(256, 256))
 
     def forward(self, x):
+        x = x.to(device)
         x = self.body(x)
         return x
 
