@@ -32,7 +32,7 @@ class ViT(torch.nn.Module):
         #    extra_blocks=LastLevelP6P7(256, 256))
 
     def forward(self, x):
-        x = x.to(device)
+        x = x.cuda()
         x = self.vit._process_input(x)
         batch_class_token = self.vit.class_token.expand(x.shape[0], -1, -1)
         x = torch.cat([batch_class_token, x], dim=1)
@@ -62,7 +62,7 @@ class SwinT(torch.nn.Module):
         #    extra_blocks=LastLevelP6P7(256, 256))
 
     def forward(self, x):
-        x = x.to(device)
+        x = x.cuda()
         x = self.body(x)
         return x
 
