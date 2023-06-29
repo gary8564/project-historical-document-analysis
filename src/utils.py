@@ -185,22 +185,22 @@ def get_transform(moreAugmentations, backbone=None):
     Pytorch transformers
     """
     transformList = []
-    if backbone:
-        assert backbone in ["vit", "swint"]
-        if backbone == "vit":
-            transformList.append(transforms.Resize(224))
-        else:
-            transformList.append(transforms.Resize(256))
+    if backbone == "vit":
+        transformList.append(transforms.Resize(256))
+        transformList.append(transforms.RandomCrop(224))
+    else:
+        transformList.append(transforms.Resize(272))
+        transformList.append(transforms.RandomCrop(256))
     if moreAugmentations:
         transformList.append(transforms.RandomPhotometricDistort())
-        transformList.append(transforms.RandomZoomOut(
-            fill=defaultdict(lambda: 0, {Image.Image: (123, 117, 104)})
-        ))
-        transformList.append(transforms.RandomIoUCrop())
+        #transformList.append(transforms.RandomZoomOut(
+        #    fill=defaultdict(lambda: 0, {Image.Image: (123, 117, 104)})
+        #))
+        #transformList.append(transforms.RandomIoUCrop())
         transformList.append(transforms.RandomHorizontalFlip())
         transformList.append(transforms.ColorJitter(contrast=0.5))
         transformList.append(transforms.RandomRotation([-15,15]))
-        transformList.append(transforms.SanitizeBoundingBox())
+        #transformList.append(transforms.SanitizeBoundingBox())
     transformList.append(transforms.PILToTensor())
     transformList.append(transforms.ConvertImageDtype(torch.float32))
     return transforms.Compose(transformList)
