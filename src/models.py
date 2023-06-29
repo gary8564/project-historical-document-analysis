@@ -21,10 +21,9 @@ class ViT(torch.nn.Module):
         with torch.no_grad():
             out = self.vit._process_input(inp)
             batch_class_token = self.vit.class_token.expand(out.shape[0], -1, -1)
-            out = torch.cat([batch_class_token, out], dim=1) 
+            out = torch.cat([batch_class_token, out], dim=1)
             out = self.vit.encoder(out)
-            out = out[:, 0]
-        self.out_channels = out.shape[1]
+        self.out_channels = out.shape[1] * 3
         
         # Build FPN
         #in_channels_list = [out.shape[1]] * 3
@@ -38,6 +37,7 @@ class ViT(torch.nn.Module):
         batch_class_token = self.vit.class_token.expand(x.shape[0], -1, -1)
         x = torch.cat([batch_class_token, x], dim=1)
         x = self.vit.encoder(x)
+        x = x.view(2, -1, 16, 16)
         return x
 
 class SwinT(torch.nn.Module):
@@ -50,7 +50,7 @@ class SwinT(torch.nn.Module):
         #feature_extractor = create_feature_extractor(pretrained_vit, return_nodes=train_nodes[:-1])        
         #backbone = feature_extractor
         # Dry run to get number of channels for FPN
-        inp = torch.randn(2, 3, 224, 224)
+        inp = torch.randn(2, 3, 256, 256)
         with torch.no_grad():
             out = self.body(inp)
         self.out_channels = out.shape[1]
