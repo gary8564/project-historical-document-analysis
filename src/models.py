@@ -24,15 +24,16 @@ class ViT(torch.nn.Module):
             out = torch.cat([batch_class_token, out], dim=1) 
             out = self.vit.encoder(out)
             out = out[:, 0]
-        in_channels_list = [out.shape[1]] * 3
+        self.out_channels = out.shape[1]
+        
         # Build FPN
-        self.out_channels = 256
-        self.fpn = FeaturePyramidNetwork(
-            in_channels_list, out_channels=self.out_channels,
-            extra_blocks=LastLevelP6P7(256, 256))
+        #in_channels_list = [out.shape[1]] * 3
+        #self.out_channels = 256
+        #self.fpn = FeaturePyramidNetwork(
+        #    in_channels_list, out_channels=self.out_channels,
+        #    extra_blocks=LastLevelP6P7(256, 256))
 
     def forward(self, x):
-        print("Image is -->",x.size())
         x = self.vit._process_input(x)
         batch_class_token = self.vit.class_token.expand(x.shape[0], -1, -1)
         x = torch.cat([batch_class_token, x], dim=1)
@@ -52,12 +53,14 @@ class SwinT(torch.nn.Module):
         inp = torch.randn(2, 3, 224, 224)
         with torch.no_grad():
             out = self.body(inp)
-        in_channels_list = [out.shape[1]] * 3
+        self.out_channels = out.shape[1]
+  
         # Build FPN
-        self.out_channels = 256
-        self.fpn = FeaturePyramidNetwork(
-            in_channels_list, out_channels=self.out_channels,
-            extra_blocks=LastLevelP6P7(256, 256))
+        #in_channels_list = [out.shape[1]] * 3
+        #self.out_channels = 256
+        #self.fpn = FeaturePyramidNetwork(
+        #    in_channels_list, out_channels=self.out_channels,
+        #    extra_blocks=LastLevelP6P7(256, 256))
 
     def forward(self, x):
         x = self.body(x)
@@ -97,13 +100,9 @@ def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_rati
         if backbone:
             assert backbone in ["ResNet_FPN", "ViT", "SwinT"]
             if (backbone == "ViT"):
-                return_layers = {'vit': 'body'}
-                in_channels_list = [768] * 3
-                backboneModel = BackboneWithFPN(backbone=ViT(device), return_layers=return_layers, in_channels_list=in_channels_list, out_channels=256)
+                backboneModel = ViT(device)
             elif (backbone == "SwinT"):
-                return_layers = {'swint': 'body'}
-                in_channels_list = [1024] * 3
-                backboneModel = BackboneWithFPN(backbone=SwinT(device), return_layers=return_layers, in_channels_list=in_channels_list, out_channels=256)
+                backboneModel = SwinT(device)
             else:
                 backboneModel = resnet_fpn_backbone('resnext101_32x8d', weights=ResNeXt101_32X8D_Weights.DEFAULT,
                                                     returned_layers=[2, 3, 4], extra_blocks=LastLevelP6P7(256, 256))
@@ -187,10 +186,10 @@ def get_model(device='cpu', model_name='baseline'):
 if __name__ == "__main__":
     from utils import freeze_layers
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    backbone = "SwinT"
+    backbone = "ViT"
     anchor_sizes = tuple((x, int(x * 2 ** (1.0 / 3)), int(x * 2 ** (2.0 / 3))) for x in [16, 32, 64, 128, 256])
     aspect_ratios=((0.33, 0.5, 1.0, 1.33, 2.0),) * len(anchor_sizes)
     model = retinaNet(num_classes=20, device=device, backbone=backbone, anchor_sizes=anchor_sizes, aspect_ratios=aspect_ratios)
-    frozen_layers = ["backbone.body"] 
+    frozen_layers = ["backbone"] 
     model = freeze_layers(model, frozen_layers) 
     print(model)
