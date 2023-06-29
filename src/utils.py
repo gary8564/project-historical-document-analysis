@@ -168,7 +168,7 @@ def get_pretrained_model_transform(pretrained_model_weights):
     pretrained_model_transforms= pretrained_model_weights.transforms()
     return pretrained_model_transforms
 
-def get_transform(moreAugmentations, backbone=None):
+def get_transform(moreAugmentations):
     """
     define the transforms for data augmentation
 
@@ -176,7 +176,7 @@ def get_transform(moreAugmentations, backbone=None):
     ----------
     moreAugmentations : boolean
         If true, more data transformations are operated to avoid overfitting.
-                
+    
     Returns
     -------
     Pytorch transformers
