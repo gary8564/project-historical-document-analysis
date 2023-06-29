@@ -96,13 +96,19 @@ def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_rati
         backboneModel = resnet_fpn_backbone('resnet50', weights=ResNet50_Weights.DEFAULT, 
                                             returned_layers=[2, 3, 4], extra_blocks=LastLevelP6P7(256, 256))
         anchor_sizes = tuple((x, int(x * 2 ** (1.0 / 3)), int(x * 2 ** (2.0 / 3))) for x in [32, 64, 128, 256, 512])
-        aspect_ratios = ((0.5, 1.0, 2.0),) * len(anchor_sizes) 
+        aspect_ratios = ((0.5, 1.0, 2.0),) * len(anchor_sizes)
+        min_size = 800
+        max_size = 1333
         if backbone:
             assert backbone in ["ResNet_FPN", "ViT", "SwinT"]
             if (backbone == "ViT"):
                 backboneModel = ViTWithFPN(device)
+                min_size = 100
+                max_size = 224
             elif (backbone == "SwinT"):
                 backboneModel = SwinTWithFPN(device)
+                min_size = 100
+                max_size = 256
             else:
                 backboneModel = resnet_fpn_backbone('resnext101_32x8d', weights=ResNeXt101_32X8D_Weights.DEFAULT,
                                                     returned_layers=[2, 3, 4], extra_blocks=LastLevelP6P7(256, 256))
@@ -115,6 +121,8 @@ def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_rati
         model = RetinaNet(
             backbone=backboneModel,
             num_classes=num_classes,
+            min_size=min_size,
+            max_size=max_size,
             anchor_generator=anchorGenerator(anchor_sizes, aspect_ratios),
         )
         #print(model)
