@@ -16,6 +16,7 @@ class ViT(torch.nn.Module):
         # Get a ViT backbone
         vit = pretrained_ViT(device)
         self.class_token = vit.class_token
+        self.conv_proj = vit.conv_proj
         self.conv_embed = vit._process_input
         self.encoder = vit.encoder
         # Dry run to get number of channels for FPN
