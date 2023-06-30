@@ -22,11 +22,8 @@ class ViT(torch.nn.Module):
         # Dry run to get number of channels for FPN
         inp = torch.randn(2, 3, 224, 224)
         with torch.no_grad():
-            out = self.conv_embed(inp)
-            batch_class_token = self.class_token.expand(out.shape[0], -1, -1)
-            out = torch.cat([batch_class_token, out], dim=1)
-            out = self.encoder(out)
-        self.out_channels = out.shape[1] * 3
+            out = self.forward(inp)
+        self.out_channels = out.shape[1]
         
         # Build FPN
         #in_channels_list = [out.shape[1]] * 3
