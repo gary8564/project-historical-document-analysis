@@ -22,13 +22,13 @@ class ViT(torch.nn.Module):
         with torch.no_grad():
             out = self.body(inp)
             batch_size = out['encoder'].size(0)
-            out['encoder'] = out['encoder'].view(batch_size, -1, 16, 16)
+            out = out['encoder'].view(batch_size, -1, 16, 16)
         self.out_channels = out.shape[1]
 
     def forward(self, x):
         x = x.cuda()
         x = self.body(x)
-        x['encoder'] = x['encoder'].view(x['encoder'].size(0), -1, 16, 16)
+        x = x['encoder'].view(x['encoder'].size(0), -1, 16, 16)
         return x
     
 class ViTWithFPN(torch.nn.Module):
