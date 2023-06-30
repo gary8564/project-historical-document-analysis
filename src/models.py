@@ -17,7 +17,7 @@ class ViT(torch.nn.Module):
         vit = pretrained_ViT(device)
         self.body = create_feature_extractor(vit, return_nodes=['encoder'])
         # Dry run to get number of channels for FPN
-        inp = torch.randn(2, 3, 224, 224)
+        inp = torch.randn(2, 3, 224, 224).cuda()
         with torch.no_grad():
             out = self.body(inp)
             out['encoder'] = out['encoder'].view(2, -1, 16, 16)
@@ -31,6 +31,7 @@ class ViT(torch.nn.Module):
             extra_blocks=LastLevelP6P7(256, 256))
 
     def forward(self, x):
+        x = x.cuda()
         x = self.body(x)
         x['encoder'] = x['encoder'].view(2, -1, 16, 16)
         x = self.fpn(x)
@@ -45,7 +46,7 @@ class SwinT(torch.nn.Module):
         #feature_extractor = create_feature_extractor(pretrained_vit, return_nodes=train_nodes[:-1])        
         #backbone = feature_extractor
         # Dry run to get number of channels for FPN
-        inp = torch.randn(2, 3, 256, 256)
+        inp = torch.randn(2, 3, 256, 256).cuda()
         with torch.no_grad():
             out = self.body(inp)
         self.out_channels = out.shape[1]
@@ -58,6 +59,7 @@ class SwinT(torch.nn.Module):
         #    extra_blocks=LastLevelP6P7(256, 256))
 
     def forward(self, x):
+        x = x.cuda()
         x = self.body(x)
         return x
 
