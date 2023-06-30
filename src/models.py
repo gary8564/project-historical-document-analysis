@@ -20,7 +20,8 @@ class ViT(torch.nn.Module):
         inp = torch.randn(2, 3, 224, 224).cuda()
         with torch.no_grad():
             out = self.body(inp)
-            out['encoder'] = out['encoder'].view(2, -1, 16, 16)
+            batch_size = out['encoder'].size(0)
+            out['encoder'] = out['encoder'].view(batch_size, -1, 16, 16)
         #self.out_channels = out.shape[1]
         
         # Build FPN
@@ -32,9 +33,8 @@ class ViT(torch.nn.Module):
 
     def forward(self, x):
         x = x.cuda()
-        print("image size:", x.size())
         x = self.body(x)
-        x['encoder'] = x['encoder'].view(2, -1, 16, 16)
+        x['encoder'] = x['encoder'].view(x['encoder'].size(0), -1, 16, 16)
         x = self.fpn(x)
         return x
 
