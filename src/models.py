@@ -123,11 +123,11 @@ def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_rati
         if backbone:
             assert backbone in ["ResNet_FPN", "ViT", "SwinT"]
             if (backbone == "ViT"):
-                backboneModel = ViT(device)
+                backboneModel = ViT(device).to(device)
                 anchorSizes = ((32, 64, 128, 256, 512),)
                 aspectRatios = ((0.5, 1.0, 2.0),)
             elif (backbone == "SwinT"):
-                backboneModel = SwinT(device)
+                backboneModel = SwinT(device).to(device)
                 anchorSizes = ((32, 64, 128, 256, 512),)
                 aspectRatios = ((0.5, 1.0, 2.0),)
             else:
