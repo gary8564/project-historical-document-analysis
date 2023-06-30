@@ -135,13 +135,23 @@ def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_rati
         aspectRatios = ((0.5, 1.0, 2.0),) * len(anchor_sizes)
         
         if backbone:
-            assert backbone in ["ResNet_FPN", "ViT", "SwinT"]
+            assert backbone in ["ResNet_FPN", "ViT", "SwinT", "ViTFPN", "SWinTFPN"]
             if (backbone == "ViT"):
                 backboneModel = ViT(device)
+                anchorSizes = ((32, 64, 128, 256, 512),)
+                aspectRatios = ((0.5, 1.0, 2.0),)
             elif (backbone == "SwinT"):
                 backboneModel = SwinT(device)
                 anchorSizes = ((32, 64, 128, 256, 512),)
                 aspectRatios = ((0.5, 1.0, 2.0),)
+            elif (backbone == "ViTFPN"):
+                backboneModel = ViTWithFPN(device)
+                anchorSizes = ((32,), (64,), (128,), (256,), (512,),) 
+                aspectRatios = ((0.5, 1.0, 2.0),) * len(anchor_sizes)
+            elif (backbone == "SwinTFPN"):
+                backboneModel = SwinTWithFPN(device)
+                anchorSizes = ((32,), (64,), (128,), (256,), (512,),) 
+                aspectRatios = ((0.5, 1.0, 2.0),) * len(anchor_sizes)
             else:
                 backboneModel = resnet_fpn_backbone('resnext101_32x8d', weights=ResNeXt101_32X8D_Weights.DEFAULT,
                                                     returned_layers=[2, 3, 4], extra_blocks=LastLevelP6P7(256, 256))
