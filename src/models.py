@@ -14,14 +14,17 @@ class ViT(torch.nn.Module):
     def __init__(self, device):
         super(ViT, self).__init__()
         # Get a ViT backbone
-        self.vit = pretrained_ViT(device)
+        vit = pretrained_ViT(device)
+        self.class_token = vit.class_token
+        self.conv_embed = vit._process_input
+        self.encoder = vit.encoder
         # Dry run to get number of channels for FPN
         inp = torch.randn(2, 3, 224, 224)
         with torch.no_grad():
-            out = self.vit._process_input(inp)
-            batch_class_token = self.vit.class_token.expand(out.shape[0], -1, -1)
+            out = self.conv_embed(inp)
+            batch_class_token = self.class_token.expand(out.shape[0], -1, -1)
             out = torch.cat([batch_class_token, out], dim=1)
-            out = self.vit.encoder(out)
+            out = self.encoder(out)
         self.out_channels = out.shape[1] * 3
         
         # Build FPN
@@ -32,11 +35,10 @@ class ViT(torch.nn.Module):
         #    extra_blocks=LastLevelP6P7(256, 256))
 
     def forward(self, x):
-        x = x.cuda()
-        x = self.vit._process_input(x)
-        batch_class_token = self.vit.class_token.expand(x.shape[0], -1, -1)
+        x = self.conv_embed(x)
+        batch_class_token = self.class_token.expand(x.shape[0], -1, -1)
         x = torch.cat([batch_class_token, x], dim=1)
-        x = self.vit.encoder(x)
+        x = self.encoder(x)
         x = x.view(2, -1, 16, 16)
         return x
 
@@ -44,8 +46,8 @@ class SwinT(torch.nn.Module):
     def __init__(self, device):
         super(SwinT, self).__init__()
         # Get a ViT backbone
-        self.swint = pretrained_swinT(device)
-        self.body = nn.Sequential(self.swint.features, self.swint.norm, self.swint.permute)
+        swint = pretrained_swinT(device)
+        self.body = nn.Sequential(swint.features, swint.norm, swint.permute)
         #feature_extractor = create_feature_extractor(pretrained_vit, return_nodes=train_nodes[:-1])        
         #backbone = feature_extractor
         # Dry run to get number of channels for FPN
@@ -62,7 +64,6 @@ class SwinT(torch.nn.Module):
         #    extra_blocks=LastLevelP6P7(256, 256))
 
     def forward(self, x):
-        x = x.cuda()
         x = self.body(x)
         return x
 
