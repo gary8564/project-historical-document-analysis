@@ -10,6 +10,7 @@ from torchvision.ops.feature_pyramid_network import LastLevelP6P7
 from torchvision.models.feature_extraction import create_feature_extractor
 from torchvision.models.feature_extraction import get_graph_node_names
 from torchvision.models.detection.transform import GeneralizedRCNNTransform
+
 class ViT(torch.nn.Module):
     def __init__(self, device):
         super(ViT, self).__init__()
@@ -22,10 +23,30 @@ class ViT(torch.nn.Module):
             out = self.body(inp)
             batch_size = out['encoder'].size(0)
             out['encoder'] = out['encoder'].view(batch_size, -1, 16, 16)
+        self.out_channels = out.shape[1]
+
+    def forward(self, x):
+        x = x.cuda()
+        x = self.body(x)
+        x['encoder'] = x['encoder'].view(x['encoder'].size(0), -1, 16, 16)
+        return x
+    
+class ViTWithFPN(torch.nn.Module):
+    def __init__(self, device):
+        super(ViTWithFPN, self).__init__()
+        # Get a ViT backbone
+        vit = pretrained_ViT(device)
+        self.body = create_feature_extractor(vit, return_nodes=['encoder'])
+        # Dry run to get number of channels for FPN
+        inp = torch.randn(2, 3, 224, 224).cuda()
+        with torch.no_grad():
+            out = self.body(inp)
+            batch_size = out['encoder'].size(0)
+            out['encoder'] = out['encoder'].view(batch_size, -1, 16, 16)
         #self.out_channels = out.shape[1]
         
         # Build FPN
-        in_channels_list = [o.shape[1] for o in out.values()] * 3
+        in_channels_list = [o.shape[1] for o in out.values()] * 5
         self.out_channels = 256
         self.fpn = FeaturePyramidNetwork(
             in_channels_list, out_channels=self.out_channels,
@@ -44,24 +65,41 @@ class SwinT(torch.nn.Module):
         # Get a ViT backbone
         swint = pretrained_swinT(device)
         self.body = nn.Sequential(swint.features, swint.norm, swint.permute)
-        #feature_extractor = create_feature_extractor(pretrained_vit, return_nodes=train_nodes[:-1])        
-        #backbone = feature_extractor
         # Dry run to get number of channels for FPN
         inp = torch.randn(2, 3, 256, 256).cuda()
         with torch.no_grad():
             out = self.body(inp)
         self.out_channels = out.shape[1]
   
+    def forward(self, x):
+        x = x.cuda()
+        x = self.body(x)
+        return x
+
+class SwinTWithFPN(torch.nn.Module):
+    def __init__(self, device):
+        super(SwinTWithFPN, self).__init__()
+        # Get a ViT backbone
+        swint = pretrained_swinT(device)
+        train_nodes, eval_nodes = get_graph_node_names(swint)
+        self.body = create_feature_extractor(swint, return_nodes=['permute'])        
+        # Dry run to get number of channels for FPN
+        inp = torch.randn(2, 3, 256, 256).cuda()
+        with torch.no_grad():
+            out = self.body(inp)
+        #self.out_channels = out.shape[1]
+  
         # Build FPN
-        #in_channels_list = [out.shape[1]] * 3
-        #self.out_channels = 256
-        #self.fpn = FeaturePyramidNetwork(
-        #    in_channels_list, out_channels=self.out_channels,
-        #    extra_blocks=LastLevelP6P7(256, 256))
+        in_channels_list = [o.shape[1] for o in out.values()] * 5
+        self.out_channels = 256
+        self.fpn = FeaturePyramidNetwork(
+            in_channels_list, out_channels=self.out_channels,
+            extra_blocks=LastLevelP6P7(256, 256))
 
     def forward(self, x):
         x = x.cuda()
         x = self.body(x)
+        x = self.fpn(x)
         return x
 
 def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_ratios=None):
