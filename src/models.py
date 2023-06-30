@@ -32,6 +32,7 @@ class ViT(torch.nn.Module):
 
     def forward(self, x):
         x = x.cuda()
+        print("image size:", x.size())
         x = self.body(x)
         x['encoder'] = x['encoder'].view(2, -1, 16, 16)
         x = self.fpn(x)
