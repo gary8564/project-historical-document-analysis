@@ -15,9 +15,11 @@ class ViT(torch.nn.Module):
         super(ViT, self).__init__()
         # Get a ViT backbone
         vit = pretrained_ViT(device)
+        self.image_size = vit.image_size
+        self.patch_size = vit.patch_size
+        self.hidden_dim = vit.hidden_dim
         self.class_token = vit.class_token
         self.conv_proj = vit.conv_proj
-        self.conv_embed = vit._process_input
         self.encoder = vit.encoder
         # Dry run to get number of channels for FPN
         inp = torch.randn(2, 3, 224, 224)
@@ -31,9 +33,30 @@ class ViT(torch.nn.Module):
         #self.fpn = FeaturePyramidNetwork(
         #    in_channels_list, out_channels=self.out_channels,
         #    extra_blocks=LastLevelP6P7(256, 256))
+    
+    def _process_input(self, x: torch.Tensor) -> torch.Tensor:
+        n, c, h, w = x.shape
+        p = self.patch_size
+        torch._assert(h == self.image_size, f"Wrong image height! Expected {self.image_size} but got {h}!")
+        torch._assert(w == self.image_size, f"Wrong image width! Expected {self.image_size} but got {w}!")
+        n_h = h // p
+        n_w = w // p
+
+        # (n, c, h, w) -> (n, hidden_dim, n_h, n_w)
+        x = self.conv_proj(x)
+        # (n, hidden_dim, n_h, n_w) -> (n, hidden_dim, (n_h * n_w))
+        x = x.reshape(n, self.hidden_dim, n_h * n_w)
+
+        # (n, hidden_dim, (n_h * n_w)) -> (n, (n_h * n_w), hidden_dim)
+        # The self attention layer expects inputs in the format (N, S, E)
+        # where S is the source sequence length, N is the batch size, E is the
+        # embedding dimension
+        x = x.permute(0, 2, 1)
+
+        return x
 
     def forward(self, x):
-        x = self.conv_embed(x)
+        x = self._process_input(x)
         batch_class_token = self.class_token.expand(x.shape[0], -1, -1)
         x = torch.cat([batch_class_token, x], dim=1)
         x = self.encoder(x)
