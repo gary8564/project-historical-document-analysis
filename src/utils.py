@@ -257,6 +257,7 @@ def predict(image, model, device, detection_threshold, classes, save_filename):
     with torch.no_grad():
         outputs = model(image) # get the predictions on the image
     outputs = [{k: v.to('cpu') for k, v in t.items()} for t in outputs]
+    print(outputs)
     if len(outputs[0]['boxes']) != 0:
         boxes = outputs[0]['boxes'].data.numpy()
         # get all the scores
@@ -266,7 +267,7 @@ def predict(image, model, device, detection_threshold, classes, save_filename):
         draw_boxes = boxes.copy()
         # get all the predicited class names
         pred_classes = [classes[i] for i in outputs[0]['labels'].cpu().numpy()]
-        result = draw_predict_bbox(boxes, pred_classes, classes, image_bgr)
+        result = draw_predict_bbox(draw_boxes, pred_classes, classes, image_bgr)
         cv2.imshow('Prediction', result)
         cv2.waitKey(10) 
         cv2.imwrite(f"../images/{save_filename}.png", result)

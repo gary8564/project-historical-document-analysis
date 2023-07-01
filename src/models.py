@@ -135,7 +135,7 @@ def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_rati
         aspectRatios = ((0.5, 1.0, 2.0),) * len(anchor_sizes)
         
         if backbone:
-            assert backbone in ["ResNet_FPN", "ViT", "SwinT", "ViTFPN", "SWinTFPN"]
+            assert backbone in ["ResNet_FPN", "ViT", "SwinT", "ViTFPN", "SwinTFPN"]
             if (backbone == "ViT"):
                 backboneModel = ViT(device)
                 anchorSizes = ((32, 64, 128, 256, 512),)
@@ -221,10 +221,15 @@ def roIPooler():
     return roi_pooler
 
 def get_model(device='cpu', model_name='baseline'):
-    anchor_sizes = tuple((x, int(x * 2 ** (1.0 / 3)), int(x * 2 ** (2.0 / 3))) for x in [16, 32, 64, 128, 256]) 
-    aspect_ratios=((0.33, 0.5, 1.0, 1.33, 2.0),) * len(anchor_sizes) 
     if model_name == 'baseline':
-        model = retinaNet(num_classes=20, device=device, anchor_sizes=anchor_sizes, aspect_ratios=aspect_ratios)
+        backboneModel = resnet_fpn_backbone('resnet50', weights=ResNet50_Weights.DEFAULT)
+        anchor_sizes = tuple((x, int(x * 2 ** (1.0 / 3)), int(x * 2 ** (2.0 / 3))) for x in [32, 64, 128, 256, 512])
+        aspect_ratios = ((0.5, 1.0, 2.0),) * len(anchor_sizes)
+        model = RetinaNet(
+                    backbone=backboneModel,
+                    num_classes=20,
+                    anchor_generator=anchorGenerator(anchor_sizes, aspect_ratios),
+                )
     elif model_name == 'ViT backbone':
         model = retinaNet(num_classes=20, device=device, backbone="ViT", anchor_sizes=anchor_sizes, aspect_ratios=aspect_ratios)
     else:
