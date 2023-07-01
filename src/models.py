@@ -46,7 +46,7 @@ class ViTWithFPN(torch.nn.Module):
         #self.out_channels = out.shape[1]
         
         # Build FPN
-        in_channels_list = [o.shape[1] for o in out.values()] * 5
+        in_channels_list = [o.shape[1] for o in out.values()] * 3
         self.out_channels = 256
         self.fpn = FeaturePyramidNetwork(
             in_channels_list, out_channels=self.out_channels,
@@ -90,7 +90,7 @@ class SwinTWithFPN(torch.nn.Module):
         #self.out_channels = out.shape[1]
   
         # Build FPN
-        in_channels_list = [o.shape[1] for o in out.values()] * 5
+        in_channels_list = [o.shape[1] for o in out.values()] * 3
         self.out_channels = 256
         self.fpn = FeaturePyramidNetwork(
             in_channels_list, out_channels=self.out_channels,
