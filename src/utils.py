@@ -183,10 +183,10 @@ def get_transform(moreAugmentations):
     """
     transformList = []
     if moreAugmentations:
-        transformList.append(transforms.RandomPhotometricDistort())
-        transformList.append(transforms.RandomZoomOut(
-            fill=defaultdict(lambda: 0, {Image.Image: (123, 117, 104)})
-        ))
+        #transformList.append(transforms.RandomPhotometricDistort())
+        #transformList.append(transforms.RandomZoomOut(
+        #    fill=defaultdict(lambda: 0, {Image.Image: (123, 117, 104)})
+        #))
         transformList.append(transforms.RandomIoUCrop())
         transformList.append(transforms.RandomHorizontalFlip())
         transformList.append(transforms.ColorJitter(contrast=0.5))
@@ -257,7 +257,6 @@ def predict(image, model, device, detection_threshold, classes, save_filename):
     with torch.no_grad():
         outputs = model(image) # get the predictions on the image
     outputs = [{k: v.to('cpu') for k, v in t.items()} for t in outputs]
-    print(outputs)
     if len(outputs[0]['boxes']) != 0:
         boxes = outputs[0]['boxes'].data.numpy()
         # get all the scores
