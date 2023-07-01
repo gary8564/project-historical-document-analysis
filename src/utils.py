@@ -187,7 +187,7 @@ def get_transform(moreAugmentations):
         #transformList.append(transforms.RandomZoomOut(
         #    fill=defaultdict(lambda: 0, {Image.Image: (123, 117, 104)})
         #))
-        transformList.append(transforms.RandomIoUCrop())
+        #transformList.append(transforms.RandomIoUCrop())
         transformList.append(transforms.RandomHorizontalFlip())
         transformList.append(transforms.ColorJitter(contrast=0.5))
         transformList.append(transforms.RandomRotation([-15,15]))
