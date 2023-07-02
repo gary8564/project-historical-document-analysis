@@ -2,7 +2,7 @@ import torchvision
 import torch
 from torch import nn
 from torchvision.models import ResNet50_Weights, ResNeXt101_32X8D_Weights
-from torchvision.models.efficientnet import EfficientNet, EfficientNet_B3_Weights, efficientnet_b3
+from torchvision.models.efficientnet import EfficientNet, EfficientNet_V2_S_Weights, efficientnet_v2_s
 from torchvision.models.detection.retinanet import RetinaNet, RetinaNetHead, RetinaNet_ResNet50_FPN_V2_Weights, retinanet_resnet50_fpn_v2
 from torchvision.models.detection.rpn import AnchorGenerator
 from torchvision.models.detection.backbone_utils import resnet_fpn_backbone, BackboneWithFPN
@@ -14,9 +14,9 @@ from torchvision.models.detection.transform import GeneralizedRCNNTransform
 class EfficientNet_FPN(nn.Module):
     def __init__(self,):
         super(EfficientNet_FPN, self).__init__()
-        efficientnet = efficientnet_b3(weights=EfficientNet_B3_Weights.DEFAULT).features
-        in_channels_list = [232, 384, 1536]
-        return_layers = {'6': '0', '7': '1', '8': '2'}
+        efficientnet = efficientnet_v2_s(weights=EfficientNet_V2_S_Weights.DEFAULT).features
+        in_channels_list = [160, 256, 1280]
+        return_layers = {'5': '0', '6': '1', '7': '2'}
         self.out_channels = 256
         self.backbone = BackboneWithFPN(efficientnet, return_layers, in_channels_list, self.out_channels, extra_blocks=LastLevelP6P7(256, 256))
         if torch.cuda.device_count() > 1:
