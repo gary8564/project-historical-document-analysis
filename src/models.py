@@ -2,7 +2,7 @@ import torchvision
 import torch
 from torch import nn
 from torchvision.models import ResNet50_Weights, ResNeXt101_32X8D_Weights
-from torchvision.models.efficientnet import EfficientNet, EfficientNet_B5_Weights, efficientnet_b5
+from torchvision.models.efficientnet import EfficientNet, EfficientNet_B3_Weights, efficientnet_b3
 from torchvision.models.detection.retinanet import RetinaNet, RetinaNetHead, RetinaNet_ResNet50_FPN_V2_Weights, retinanet_resnet50_fpn_v2
 from torchvision.models.detection.rpn import AnchorGenerator
 from torchvision.models.detection.backbone_utils import resnet_fpn_backbone, BackboneWithFPN
@@ -14,9 +14,9 @@ from torchvision.models.detection.transform import GeneralizedRCNNTransform
 class EfficientNet_FPN(nn.Module):
     def __init__(self,):
         super(EfficientNet_FPN, self).__init__()
-        efficientnet = efficientnet_b5(weights=EfficientNet_B5_Weights.DEFAULT).features
-        in_channels_list = [304, 512, 2048]
-        return_layers = {'6': '0', '7': '1', '8': '2'}
+        efficientnet = efficientnet_b3(weights=EfficientNet_B3_Weights.DEFAULT).features
+        in_channels_list = [136, 384, 1536]
+        return_layers = {'5': '0', '7': '1', '8': '2'}
         self.out_channels = 256
         self.backbone = BackboneWithFPN(efficientnet, return_layers, in_channels_list, self.out_channels, extra_blocks=LastLevelP6P7(256, 256))
         if torch.cuda.device_count() > 1:
@@ -70,19 +70,20 @@ class SwinTWithFPN(nn.Module):
         # Get a ViT backbone
         swint = pretrained_swinT(device)
         train_nodes, eval_nodes = get_graph_node_names(swint)
-        self.body = create_feature_extractor(swint, return_nodes=['permute'])        
-        # Dry run to get number of channels for FPN
-        inp = torch.randn(2, 3, 256, 256).cuda()
-        with torch.no_grad():
-            out = self.body(inp)
-        #self.out_channels = out.shape[1]
-  
+        self.body = create_feature_extractor(swint, return_nodes=['features.3.1.add_1',
+                                                                  'features.5.17.add_1',
+                                                                  'features.7.1.add_1'])
+              
         # Build FPN
-        in_channels_list = [o.shape[1] for o in out.values()] * 3
+        in_channels_list = [192, 384, 768]
         self.out_channels = 256
         self.fpn = FeaturePyramidNetwork(
             in_channels_list, out_channels=self.out_channels,
             extra_blocks=LastLevelP6P7(256, 256))
+        
+        if torch.cuda.device_count() > 1:
+            self.body = nn.DataParallel(self.body)
+            self.fpn = nn.DataParallel(self.fpn)
 
     def forward(self, x):
         x = x.cuda()
@@ -185,9 +186,9 @@ def pretrained_ViT(device):
 
 def pretrained_swinT(device):
     # Get pretrained weights for ViT-Base
-    pretrained_swin_weights = torchvision.models.Swin_V2_B_Weights.DEFAULT 
+    pretrained_swin_weights = torchvision.models.Swin_V2_S_Weights.DEFAULT 
     # Setup a ViT model instance with pretrained weights
-    pretrained_swin = torchvision.models.swin_v2_b(weights=pretrained_swin_weights).to(device)
+    pretrained_swin = torchvision.models.swin_v2_s(weights=pretrained_swin_weights).to(device)
     #print(pretrained_swin)
     return pretrained_swin
 
