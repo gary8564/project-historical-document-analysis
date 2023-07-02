@@ -190,7 +190,7 @@ def get_transform(moreAugmentations):
         #transformList.append(transforms.RandomIoUCrop())
         transformList.append(transforms.RandomHorizontalFlip())
         transformList.append(transforms.ColorJitter(contrast=0.5))
-        transformList.append(transforms.RandomRotation([-15,15]))
+        #transformList.append(transforms.RandomRotation([-15,15]))
         transformList.append(transforms.SanitizeBoundingBox())
     transformList.append(transforms.PILToTensor())
     transformList.append(transforms.ConvertImageDtype(torch.float32))
@@ -233,7 +233,6 @@ def prepare_for_evaluation(predictions):
         boxes = torch.stack((xmin, ymin, xmax - xmin, ymax - ymin), dim=1).tolist()
         scores = prediction["scores"].tolist()
         labels = prediction["labels"].tolist()
-        
         coco_results.extend(
             [
                 {

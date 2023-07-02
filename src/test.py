@@ -37,16 +37,15 @@ if __name__ == "__main__":
             labels = outputs[0]["labels"].tolist()
             xmin, ymin, xmax, ymax = boxes.unbind(1)
             boxes = torch.stack((xmin, ymin, xmax - xmin, ymax - ymin), dim=1).tolist()
-            thresholded_preds_inidices = [scores.index(i) for i in scores if i >= 0.5]
             coco_results.extend(
                 [
                     {
-                        "file_name": image_name,
-                        "category_id": labels[index],
-                        "bbox": boxes[index],
-                        "score": scores[index],
+                        "image_id": original_id,
+                        "category_id": labels[k],
+                        "bbox": box,
+                        "score": scores[k],
                     }
-                    for index in thresholded_preds_inidices
+                    for k, box in enumerate(boxes)
                 ]
             )
     result_filepath = repo_name + "/test.json"
