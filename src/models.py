@@ -80,7 +80,7 @@ class SwinTWithFPN(nn.Module):
         inp = torch.randn(2, 3, 256, 256).cuda()
         with torch.no_grad():
             out = self.body(inp)
-        in_channels_list = [o.shape[1] for o in out.values()] # should be [192, 384, 768]
+        in_channels_list = [torch.permute(o, (0,3,1,2)).shape[1] for o in out.values()] # should be [192, 384, 768]
         self.out_channels = 256
         self.fpn = FeaturePyramidNetwork(
             in_channels_list, out_channels=self.out_channels,
@@ -93,6 +93,8 @@ class SwinTWithFPN(nn.Module):
     def forward(self, x):
         x = x.cuda()
         x = self.body(x)
+        for key, value in x.items():
+            x[key] = torch.permute(value, (0,3,1,2))
         x = self.fpn(x)
         return x
 
