@@ -19,7 +19,8 @@ class EfficientNet_FPN(nn.Module):
         return_layers = {'6': '0', '7': '1', '8': '2'}
         self.out_channels = 256
         self.backbone = BackboneWithFPN(efficientnet, return_layers, in_channels_list, self.out_channels, extra_blocks=LastLevelP6P7(256, 256))
-        self.backbone = nn.DataParallel(self.backbone)
+        if torch.cuda.device_count() > 1:
+            self.backbone = nn.DataParallel(self.backbone)
         
     def forward(self, x):
         x = x.cuda()
@@ -140,6 +141,9 @@ def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_rati
             else:
                 backboneModel = resnet_fpn_backbone('resnext101_32x8d', weights=ResNeXt101_32X8D_Weights.DEFAULT,
                                                     returned_layers=[2, 3, 4], extra_blocks=LastLevelP6P7(256, 256))
+                if torch.cuda.device_count() > 1:
+                    backboneModel = nn.DataParallel(backboneModel)
+                    backboneModel.out_channels = 256
         
         if anchor_sizes:
             anchorSizes = anchor_sizes
