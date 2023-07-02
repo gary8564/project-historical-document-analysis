@@ -15,11 +15,12 @@ class EfficientNet_FPN(nn.Module):
     def __init__(self,):
         super(EfficientNet_FPN, self).__init__()
         efficientnet = efficientnet_b3(weights=EfficientNet_B3_Weights.DEFAULT).features
-        in_channels_list = [136, 384, 1536]
-        return_layers = {'5': '0', '7': '1', '8': '2'}
+        in_channels_list = [232, 384, 1536]
+        return_layers = {'6': '0', '7': '1', '8': '2'}
         self.out_channels = 256
         self.backbone = BackboneWithFPN(efficientnet, return_layers, in_channels_list, self.out_channels, extra_blocks=LastLevelP6P7(256, 256))
-        self.backbone = nn.DataParallel(self.backbone)
+        if torch.cuda.device_count() > 1:
+            self.backbone = nn.DataParallel(self.backbone)
         
     def forward(self, x):
         x = x.cuda()
