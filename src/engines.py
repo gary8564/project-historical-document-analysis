@@ -225,5 +225,5 @@ def warmup_lr_scheduler(optimizer, warmup_iters):
     Return: 
         custom warmup scheduler
     """
-    warmup_scheduler = optim.lr_scheduler.LinearLR(optimizer, start_factor=0.5, total_iters=warmup_iters)
+    warmup_scheduler = optim.lr_scheduler.LinearLR(optimizer, start_factor=1e-03, total_iters=warmup_iters)
     return warmup_scheduler
