@@ -11,6 +11,21 @@ from torchvision.ops.feature_pyramid_network import LastLevelP6P7
 from torchvision.models.feature_extraction import create_feature_extractor, get_graph_node_names
 from torchvision.models.detection.transform import GeneralizedRCNNTransform
     
+class EfficientNet_FPN(nn.Module):
+    def __init__(self,):
+        super(EfficientNet_FPN, self).__init__()
+        efficientnet = efficientnet_b5(weights=EfficientNet_B5_Weights.DEFAULT).features
+        in_channels_list = [304, 512, 2048]
+        return_layers = {'6': '0', '7': '1', '8': '2'}
+        self.out_channels = 256
+        self.backbone = BackboneWithFPN(efficientnet, return_layers, in_channels_list, self.out_channels, extra_blocks=LastLevelP6P7(256, 256))
+        self.backbone = nn.DataParallel(self.backbone)
+        
+    def forward(self, x):
+        x = x.cuda()
+        x = self.backbone(x)
+        return x
+    
 class ViT(nn.Module):
     def __init__(self, device):
         super(ViT, self).__init__()
@@ -121,16 +136,10 @@ def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_rati
                 anchorSizes = ((32,), (64,), (128,), (256,), (512,),) 
                 aspectRatios = ((0.5, 1.0, 2.0),) * len(anchor_sizes)
             elif (backbone == "EfficientNet_FPN"):
-                efficientnet = efficientnet_b5(weights=EfficientNet_B5_Weights.DEFAULT).features
-                in_channels_list = [304, 512, 2048]
-                return_layers = {'6': '0', '7': '1', '8': '2'}
-                out_channels = 256
-                backboneModel = BackboneWithFPN(efficientnet, return_layers, in_channels_list, out_channels, extra_blocks=LastLevelP6P7(256, 256))
-                backboneModel = nn.DataParallel(backboneModel)
+                backboneModel = EfficientNet_FPN()
             else:
                 backboneModel = resnet_fpn_backbone('resnext101_32x8d', weights=ResNeXt101_32X8D_Weights.DEFAULT,
                                                     returned_layers=[2, 3, 4], extra_blocks=LastLevelP6P7(256, 256))
-                backboneModel = nn.DataParallel(backboneModel)
         
         if anchor_sizes:
             anchorSizes = anchor_sizes
