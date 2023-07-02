@@ -2,16 +2,16 @@ import torchvision
 import torch
 from torch import nn
 from torchvision.models import ResNet50_Weights, ResNeXt101_32X8D_Weights
+from torchvision.models.efficientnet import EfficientNet, EfficientNet_B5_Weights, efficientnet_b5
 from torchvision.models.detection.retinanet import RetinaNet, RetinaNetHead, RetinaNet_ResNet50_FPN_V2_Weights, retinanet_resnet50_fpn_v2
 from torchvision.models.detection.rpn import AnchorGenerator
 from torchvision.models.detection.backbone_utils import resnet_fpn_backbone, BackboneWithFPN
 from torchvision.ops import FeaturePyramidNetwork
 from torchvision.ops.feature_pyramid_network import LastLevelP6P7
-from torchvision.models.feature_extraction import create_feature_extractor
-from torchvision.models.feature_extraction import get_graph_node_names
+from torchvision.models.feature_extraction import create_feature_extractor, get_graph_node_names
 from torchvision.models.detection.transform import GeneralizedRCNNTransform
-
-class ViT(torch.nn.Module):
+    
+class ViT(nn.Module):
     def __init__(self, device):
         super(ViT, self).__init__()
         # Get a ViT backbone
@@ -30,36 +30,8 @@ class ViT(torch.nn.Module):
         x = self.body(x)
         x = x['encoder'].view(x['encoder'].size(0), -1, 16, 16)
         return x
-    
-class ViTWithFPN(torch.nn.Module):
-    def __init__(self, device):
-        super(ViTWithFPN, self).__init__()
-        # Get a ViT backbone
-        vit = pretrained_ViT(device)
-        self.body = create_feature_extractor(vit, return_nodes=['encoder'])
-        # Dry run to get number of channels for FPN
-        inp = torch.randn(2, 3, 224, 224).cuda()
-        with torch.no_grad():
-            out = self.body(inp)
-            batch_size = out['encoder'].size(0)
-            out['encoder'] = out['encoder'].view(batch_size, -1, 16, 16)
-        #self.out_channels = out.shape[1]
-        
-        # Build FPN
-        in_channels_list = [o.shape[1] for o in out.values()] * 3
-        self.out_channels = 256
-        self.fpn = FeaturePyramidNetwork(
-            in_channels_list, out_channels=self.out_channels,
-            extra_blocks=LastLevelP6P7(256, 256))
 
-    def forward(self, x):
-        x = x.cuda()
-        x = self.body(x)
-        x['encoder'] = x['encoder'].view(x['encoder'].size(0), -1, 16, 16)
-        x = self.fpn(x)
-        return x
-
-class SwinT(torch.nn.Module):
+class SwinT(nn.Module):
     def __init__(self, device):
         super(SwinT, self).__init__()
         # Get a ViT backbone
@@ -76,7 +48,7 @@ class SwinT(torch.nn.Module):
         x = self.body(x)
         return x
 
-class SwinTWithFPN(torch.nn.Module):
+class SwinTWithFPN(nn.Module):
     def __init__(self, device):
         super(SwinTWithFPN, self).__init__()
         # Get a ViT backbone
@@ -135,7 +107,7 @@ def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_rati
         aspectRatios = ((0.5, 1.0, 2.0),) * len(anchor_sizes)
         
         if backbone:
-            assert backbone in ["ResNet_FPN", "ViT", "SwinT", "ViTFPN", "SwinTFPN"]
+            assert backbone in ["ResNeXt_FPN", "EfficientNet_FPN", "ViT", "SwinT", "SwinT_FPN"]
             if (backbone == "ViT"):
                 backboneModel = ViT(device)
                 anchorSizes = ((32, 64, 128, 256, 512),)
@@ -144,14 +116,16 @@ def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_rati
                 backboneModel = SwinT(device)
                 anchorSizes = ((32, 64, 128, 256, 512),)
                 aspectRatios = ((0.5, 1.0, 2.0),)
-            elif (backbone == "ViTFPN"):
-                backboneModel = ViTWithFPN(device)
-                anchorSizes = ((32,), (64,), (128,), (256,), (512,),) 
-                aspectRatios = ((0.5, 1.0, 2.0),) * len(anchor_sizes)
-            elif (backbone == "SwinTFPN"):
+            elif (backbone == "SwinT_FPN"):
                 backboneModel = SwinTWithFPN(device)
                 anchorSizes = ((32,), (64,), (128,), (256,), (512,),) 
                 aspectRatios = ((0.5, 1.0, 2.0),) * len(anchor_sizes)
+            elif (backbone == "EfficientNet_FPN"):
+                efficientnet = efficientnet_b5(weights=EfficientNet_B5_Weights.DEFAULT).features
+                in_channels_list = [304, 512, 2048]
+                return_layers = {'6': '0', '7': '1', '8': '2'}
+                out_channels = 256
+                backboneModel = BackboneWithFPN(efficientnet, return_layers, in_channels_list, out_channels, extra_blocks=LastLevelP6P7(256, 256))
             else:
                 backboneModel = resnet_fpn_backbone('resnext101_32x8d', weights=ResNeXt101_32X8D_Weights.DEFAULT,
                                                     returned_layers=[2, 3, 4], extra_blocks=LastLevelP6P7(256, 256))
