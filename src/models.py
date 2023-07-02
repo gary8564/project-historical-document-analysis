@@ -69,18 +69,31 @@ class SwinTWithFPN(nn.Module):
         super(SwinTWithFPN, self).__init__()
         # Get a ViT backbone
         swint = pretrained_swinT(device).features
-        return_layers = {'3': '0',
-                         '5': '1',
-                         '7': '2'}
+        train_nodes, eval_nodes = get_graph_node_names(swint)
+        self.body = create_feature_extractor(swint, return_nodes=['3.1.add_1',
+                                                                  '5.17.add_1',
+                                                                  '7.1.add_1'])
         in_channels_list = [192, 384, 768]
         self.out_channels = 256
-        self.backbone = BackboneWithFPN(swint, return_layers, in_channels_list, self.out_channels, extra_blocks=LastLevelP6P7(256, 256))
+        
+        # Build FPN
+        inp = torch.randn(2, 3, 256, 256).cuda()
+        with torch.no_grad():
+            out = self.body(inp)
+        in_channels_list = [o.shape[1] for o in out.values()] # should be [192, 384, 768]
+        self.out_channels = 256
+        self.fpn = FeaturePyramidNetwork(
+            in_channels_list, out_channels=self.out_channels,
+            extra_blocks=LastLevelP6P7(256, 256))
+
         if torch.cuda.device_count() > 1:
-            self.backbone = nn.DataParallel(self.backbone)
+            self.body = nn.DataParallel(self.body)
+            self.fpn = nn.DataParallel(self.fpn)
         
     def forward(self, x):
         x = x.cuda()
-        x = self.backbone(x)
+        x = self.body(x)
+        x = self.fpn(x)
         return x
 
 def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_ratios=None):
