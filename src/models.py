@@ -19,8 +19,7 @@ class EfficientNet_FPN(nn.Module):
         return_layers = {'5': '0', '7': '1', '8': '2'}
         self.out_channels = 256
         self.backbone = BackboneWithFPN(efficientnet, return_layers, in_channels_list, self.out_channels, extra_blocks=LastLevelP6P7(256, 256))
-        if torch.cuda.device_count() > 1:
-            self.backbone = nn.DataParallel(self.backbone)
+        self.backbone = nn.DataParallel(self.backbone)
         
     def forward(self, x):
         x = x.cuda()
@@ -68,27 +67,19 @@ class SwinTWithFPN(nn.Module):
     def __init__(self, device):
         super(SwinTWithFPN, self).__init__()
         # Get a ViT backbone
-        swint = pretrained_swinT(device)
-        train_nodes, eval_nodes = get_graph_node_names(swint)
-        self.body = create_feature_extractor(swint, return_nodes=['features.3.1.add_1',
-                                                                  'features.5.17.add_1',
-                                                                  'features.7.1.add_1'])
-              
-        # Build FPN
+        swint = pretrained_swinT(device).features
+        return_layers = {'3': '0',
+                         '5': '1',
+                         '7': '2'}
         in_channels_list = [192, 384, 768]
         self.out_channels = 256
-        self.fpn = FeaturePyramidNetwork(
-            in_channels_list, out_channels=self.out_channels,
-            extra_blocks=LastLevelP6P7(256, 256))
-        
+        self.backbone = BackboneWithFPN(swint, return_layers, in_channels_list, self.out_channels, extra_blocks=LastLevelP6P7(256, 256))
         if torch.cuda.device_count() > 1:
-            self.body = nn.DataParallel(self.body)
-            self.fpn = nn.DataParallel(self.fpn)
-
+            self.backbone = nn.DataParallel(self.backbone)
+        
     def forward(self, x):
         x = x.cuda()
-        x = self.body(x)
-        x = self.fpn(x)
+        x = self.backbone(x)
         return x
 
 def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_ratios=None):
@@ -135,8 +126,6 @@ def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_rati
                 aspectRatios = ((0.5, 1.0, 2.0),)
             elif (backbone == "SwinT_FPN"):
                 backboneModel = SwinTWithFPN(device)
-                anchorSizes = ((32,), (64,), (128,), (256,), (512,),) 
-                aspectRatios = ((0.5, 1.0, 2.0),) * len(anchor_sizes)
             elif (backbone == "EfficientNet_FPN"):
                 backboneModel = EfficientNet_FPN()
             else:
