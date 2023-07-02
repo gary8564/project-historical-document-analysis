@@ -148,7 +148,7 @@ def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_rati
             model.transform = GeneralizedRCNNTransform(min_size=256, max_size=272, image_mean=[0.485, 0.456, 0.406], 
                                      image_std=[0.229, 0.224, 0.225], fixed_size=(256, 256))
         #print(model)
-        return model.to(device)    
+        return model   
     else:
         model = retinanet_resnet50_fpn_v2(weights=RetinaNet_ResNet50_FPN_V2_Weights.DEFAULT)
         # get number of input features and anchor boxed for the classifier
@@ -157,7 +157,7 @@ def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_rati
         # replace the pre-trained head with a new one
         model.head = RetinaNetHead(in_features, num_anchors, num_classes)
         #print(model)
-        return model.to(device)
+        return model
         
 def pretrained_ViT(device):
     # Get pretrained weights for ViT-Base
