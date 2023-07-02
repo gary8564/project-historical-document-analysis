@@ -126,9 +126,11 @@ def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_rati
                 return_layers = {'6': '0', '7': '1', '8': '2'}
                 out_channels = 256
                 backboneModel = BackboneWithFPN(efficientnet, return_layers, in_channels_list, out_channels, extra_blocks=LastLevelP6P7(256, 256))
+                backboneModel = nn.DataParallel(backboneModel)
             else:
                 backboneModel = resnet_fpn_backbone('resnext101_32x8d', weights=ResNeXt101_32X8D_Weights.DEFAULT,
                                                     returned_layers=[2, 3, 4], extra_blocks=LastLevelP6P7(256, 256))
+                backboneModel = nn.DataParallel(backboneModel)
         
         if anchor_sizes:
             anchorSizes = anchor_sizes
@@ -148,7 +150,7 @@ def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_rati
             model.transform = GeneralizedRCNNTransform(min_size=256, max_size=272, image_mean=[0.485, 0.456, 0.406], 
                                      image_std=[0.229, 0.224, 0.225], fixed_size=(256, 256))
         #print(model)
-        return model   
+        return model.to(device)    
     else:
         model = retinanet_resnet50_fpn_v2(weights=RetinaNet_ResNet50_FPN_V2_Weights.DEFAULT)
         # get number of input features and anchor boxed for the classifier
@@ -157,7 +159,7 @@ def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_rati
         # replace the pre-trained head with a new one
         model.head = RetinaNetHead(in_features, num_anchors, num_classes)
         #print(model)
-        return model
+        return model.to(device)
         
 def pretrained_ViT(device):
     # Get pretrained weights for ViT-Base
