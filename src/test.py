@@ -3,6 +3,7 @@ import glob
 from PIL import Image
 import torch
 import os
+import argparse
 
 if __name__ == "__main__":
     # append system path
@@ -10,13 +11,24 @@ if __name__ == "__main__":
     repo_name = "/Users/kyle_lee/Desktop/Bauhaus/DL4CV/final-project-gary8564"
     sys.path.append(repo_name)
     from src import *
+    
+    # Construct the argument parser.
+    parser.add_argument('-m', '--backbone', default='ResNeXT101FPN', 
+                    help='baseline(ResNet50), EfficientNet wtih FPN, ResNeXT101 with FPN',
+                    choices=['baseline', 'EfficientNetFPN', 'ResNeXT101FPN'])
+    parser.add_argument('-w', '--weights', default='/pretrained/model_ResNeXt_FPN_RetinaNet_retrain.pt',
+                    help='trained model weight path')
+    args = vars(parser.parse_args())
+    
+    # load test dataset
     data_dir = os.path.join(repo_name, "test")
     test_images = glob.glob(f"{data_dir}/*") 
     print(f"Test instances: {len(test_images)}")
+    
+    # model evaluation
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    batch_size = 2
-    model = get_model(device='cpu', model_name='baseline')
-    weights_path = repo_name + '/pretrained/model_baseline_batch2_SGD_changeAnchorBoxes.pt'
+    model = get_model(device=device, model_name='baseline')
+    weights_path = repo_name + args['weights']
     model = load_pretrained_weights(model, weights_path, device)
     model.eval()
     coco_results = []
@@ -40,7 +52,7 @@ if __name__ == "__main__":
             coco_results.extend(
                 [
                     {
-                        "image_id": original_id,
+                        "file_name": image_name,
                         "category_id": labels[k],
                         "bbox": box,
                         "score": scores[k],

@@ -383,7 +383,7 @@ if __name__ == "__main__":
     test = TexBigDataset(train_img_path, annot_filename)
     summary = aspectRatioStats(test.annot_path)
     print(summary)
-    '''
+    
     with open(test.annot_path, "r") as read_file:
         annot_data = json.load(read_file)
     img_path = '../archive/val/14688302_1881_Seite_002.tiff'
@@ -448,6 +448,6 @@ if __name__ == "__main__":
     plt.title("Linearly Warm-up Step Decay Learning Rate Scheduler")
     plt.show()
     sns.reset_orig()
-    '''
+    
 
     

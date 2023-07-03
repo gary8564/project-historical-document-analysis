@@ -216,6 +216,8 @@ def roIPooler():
     return roi_pooler
 
 def get_model(device='cpu', model_name='baseline'):
+    assert model_name in ["baseline", "EfficientNetFPN", "ResNeXT101FPN", 
+                          "SwinTFPN", "SwinT", "ViT"]
     if model_name == 'baseline':
         backboneModel = resnet_fpn_backbone('resnet50', weights=ResNet50_Weights.DEFAULT)
         anchor_sizes = tuple((x, int(x * 2 ** (1.0 / 3)), int(x * 2 ** (2.0 / 3))) for x in [32, 64, 128, 256, 512])
@@ -225,10 +227,26 @@ def get_model(device='cpu', model_name='baseline'):
                     num_classes=20,
                     anchor_generator=anchorGenerator(anchor_sizes, aspect_ratios),
                 )
-    elif model_name == 'ViT backbone':
-        model = retinaNet(num_classes=20, device=device, backbone="ViT", anchor_sizes=anchor_sizes, aspect_ratios=aspect_ratios)
+    elif model_name == 'EfficientNetFPN':
+        anchor_sizes = tuple((x, int(x * 2 ** (1.0 / 3)), int(x * 2 ** (2.0 / 3))) for x in [32, 64, 128, 256, 512])
+        aspect_ratios = ((0.33, 0.5, 1.0, 2.0),) * len(anchor_sizes)
+        model = retinaNet(num_classes=20, device=device, backbone="EfficientNet_FPN", anchor_sizes=anchor_sizes, aspect_ratios=aspect_ratios)
+    elif model_name == 'ResNeXT101FPN':
+        anchor_sizes = tuple((x, int(x * 2 ** (1.0 / 3)), int(x * 2 ** (2.0 / 3))) for x in [32, 64, 128, 256, 512])
+        aspect_ratios=((0.33, 0.5, 1.0, 2.0),) * len(anchor_sizes)
+        model = retinaNet(num_classes=20, device=device, backbone="ResNeXt_FPN", anchor_sizes=anchor_sizes, aspect_ratios=aspect_ratios)
+    elif model_name == 'SwinTFPN':
+        anchor_sizes = tuple((x, int(x * 2 ** (1.0 / 3)), int(x * 2 ** (2.0 / 3))) for x in [16, 32, 64, 128, 256])
+        aspect_ratios=((0.5, 1.0, 2.0),) * len(anchor_sizes)
+        model = retinaNet(num_classes=20, device=device, backbone='SwinT_FPN', anchor_sizes=anchor_sizes, aspect_ratios=aspect_ratios)
+    elif model_name == 'SwinT':
+        anchor_sizes = ((16, 32, 64, 128, 256),)
+        aspect_ratios=((0.33, 0.5, 1.0, 1.33, 2.0),) * len(anchor_sizes)
+        model = retinaNet(num_classes=20, device=device, backbone='SwinT', anchor_sizes=anchor_sizes, aspect_ratios=aspect_ratios)
     else:
-        model = retinaNet(num_classes=20, device=device, backbone="SwinT", anchor_sizes=anchor_sizes, aspect_ratios=aspect_ratios)
+        anchor_sizes = ((16, 32, 64, 128, 256),)
+        aspect_ratios=((0.33, 0.5, 1.0, 1.33, 2.0),) * len(anchor_sizes)
+        model = retinaNet(num_classes=20, device=device, backbone='ViT', anchor_sizes=anchor_sizes, aspect_ratios=aspect_ratios)
     model = model.eval().to(device)
     return model
 

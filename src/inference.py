@@ -17,10 +17,11 @@ if __name__ == "__main__":
                     help='path to input image') 
     parser.add_argument('-t', '--threshold', default=0.5, type=float, 
                     help='minimum confidence score for detection')
-    parser.add_argument('-m', '--model', default='baseline', 
-                    help='baseline model(retinanet_resnet50_fpn_v2) or retinanet with ViT backbone or retinanet with SwinT backbone',
-                    choices=['baseline', 'ViT backbone', 'SwinTbackbone'])
-    parser.add_argument('-w', '--weights', default='../pretrained/model_baseline_batch2_SGD_changeAnchorBoxes.pt',
+    parser.add_argument('-m', '--model', default='ResNeXT101FPN', 
+                    help='baseline model(retinanet_resnet50_fpn_v2), RetinaNet with EfficientNet FPN, \
+                        RetinaNet with ResNeXT101 FPN',
+                    choices=['baseline', 'EfficientNetFPN', 'ResNeXT101FPN'])
+    parser.add_argument('-w', '--weights', default='../pretrained/model_ResNeXt_FPN_RetinaNet_retrain.pt',
                     help='trained model weight path')
     args = vars(parser.parse_args())
 
