@@ -161,7 +161,7 @@ The comparison results of different pre-trained backbone models are shown as fol
 | with feature pyramids |||||||
 | [SwinT](https://pytorch.org/vision/stable/models/swin_transformer.html) | 0.242 | 0.398 | 0.224 | 0.244| 0.160| 0.183 |   
 | [EfficientNetV2](https://pytorch.org/vision/main/models/efficientnetv2.html)| 0.441 | 0.637 | 0.478  | 0.231 | 0.225 | 0.435  |
-| [ResNeXT101](https://pytorch.org/vision/main/models/resnext.html) |0.512 | 0.693 | 0.562 | 0.313 | 0.358 | 0.494|           
+| [ResNeXT101](https://pytorch.org/vision/main/models/resnext.html) |0.492 | 0.693 | 0.532 | 0.263 | 0.298 | 0.484|           
 
 ### 3. Data Augmentation
 From the ablation study, ResNeXT101 as backbone yields the most promising result. Therefore, in this section, only ResNeXT101 backbone is considered.
@@ -177,13 +177,12 @@ The above results show that data augmentation can increase mAP by 6.6%.
 Retrain the best configuration (ResNeXT101-backbone; batch size=2; SGD with learning rate=0.001; warmup StepLR scheduler). 
 The model weights can be downloaded [here](https://www.kaggle.com/datasets/gary8564/texbigdataset-trained-models).
 The result of mAP is shown as follows:
-
 | retrain epochs| mAP           | mAP<sub>50</sub>| mAP<sub>75</sub>| mAP<sub>*s*</sub>| mAP<sub>*m*</sub>| mAP<sub>*l*</sub>| download |
 |:-------------:|:-------------:|:---------------:|:---------------:|:--------------:|:--------------:|:--------------:|:--------------:|
-| 8<sup>[a](#note)</sup> | 0.610 |   0.802 |  0.654  | 0.361  |  0.428  |  0.599 | [link](https://drive.google.com/file/d/1hhoe8fKb2BuQbXcQ1llpOqRZZ-8M_xjz/view?usp=sharing)|
+| 8 <sup>[a](#note)</sup> | 0.610 |   0.802 |  0.654  | 0.361  |  0.428  |  0.599 | [link](https://drive.google.com/file/d/1hhoe8fKb2BuQbXcQ1llpOqRZZ-8M_xjz/view?usp=sharing)|
 | 16 | 0.624 |   0.827 |  0.680  | 0.374  |  0.444  |  0.611 | [link](https://drive.google.com/file/d/15Fo95F_36xolUSnw3OvQm36mCiHPTBrm/view?usp=sharing)|
 
-<a id="note"><sup>[a]</sup></a>The retrained model of 8 epochs is the result on the leaderboard.
+<a id="note">Note<sup>[a]</sup></a>: the retrained model of 8 epochs is the result on the leaderboard.
 
 
 The comparison between the prediction of the final model and the ground-truth annotations is visualized below:
@@ -211,7 +210,7 @@ In order to fit in the constraints of training capacity, most of the encoder lay
 Even though the result is not promising, the above mAP results can still get another interesting observation: SwinT transformers have more learning capacity to detect smaller objects.
 
 (2) ResNeXT and EfficientNet:
-In order to speed up the training process, `nn.DataParallel` is utilized to fit with the Kaggle GPU-T4x2 accelerator. The above ablation study indicates that both EfficientNet and ResNeXT yield outstanding performances. Still, mAP of the ResNeXT-backbone model is 
+In order to speed up the training process, `nn.DataParallel` is utilized to fit with the Kaggle GPU-T4x2 accelerator. The above ablation study indicates that both EfficientNet and ResNeXT yield outstanding performances. In particular, ResNeXT-backbone model exceptionally outperforms others. 
  
 
 ## Outlook and Future Work
