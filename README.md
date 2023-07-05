@@ -3,8 +3,8 @@
 An ablation study on RetinaNet for historical document layout analysis
 
 ## Introduction
-In the realm of document layouts analysis, the results of previous works<sup>[[1]](#1)</sup> <sup>[[2]](#2)</sup> have pointed out that CV-based approaches performs better than NLP-based approaches.
-This project tries to implement a state-of-the-art and efficient object detector to document layout analysis on [TexBig dataset](https://zenodo.org/record/6885144) with the consideration of training constraints on Kaggle notebook. 
+In the realm of document layouts analysis, the results of previous works<sup>[[1]](#1)</sup> <sup>[[2]](#2)</sup> have pointed out that CV-based approaches perform better than NLP-based approaches.
+This project tries to implement a state-of-the-art and efficient object detector to document layout analysis on [TexBig dataset](https://zenodo.org/record/6885144) with the consideration of training constraints on the Kaggle notebook. 
 
 ## Table of Contents
 * [Problem Statement](#problem-statement)
@@ -19,21 +19,21 @@ This project tries to implement a state-of-the-art and efficient object detector
 * [Citation](#citation)
 
 ## Problem Statement
-Create a well-suited object detection model for TexBig dataset, a domain-specifically dataset for historical document layout analysis under the constraints of training a batch size of at least 2 on a NVIDIA Tesla P100 with 12 GB VRAM within an 9-hour window.
+Create a well-suited object detection model for the TexBig dataset, a domain-specifically dataset for historical document layout analysis under the constraints of training a batch size of at least 2 on an NVIDIA Tesla P100 with 12 GB VRAM within a 9-hour window.
 
 ## Proposed Solutions
 Considering the constraints of runtime sessions and the limited GPU resources, a [pretrained RetinaNet](https://github.com/pytorch/vision/blob/main/torchvision/models/detection/retinanet.py)<sup>[[3]](#3)</sup> model provided in [Pytorch model zoo](https://pytorch.org/vision/stable/models.html#) is the candidate of my baseline approach. 
 Based on the textual features of the dataset, a [pretrained ViT](https://github.com/pytorch/vision/blob/main/torchvision/models/vision_transformer.py)<sup>[[4]](#4)</sup> and [SwinT](https://github.com/pytorch/vision/blob/main/torchvision/models/swin_transformer.py)<sup>[[5]](#5)</sup> are chosen to be the backbones of RetinaNet.
 
 ## Dataset Description
-TexBig<sup>[[6]](#6)</sup> is a high-quality document layouts dataset in historical digital humanities domain. The dataset provides fine-grained annotations with 19 classes as well as instance segmentation level ground truth data in COCO format. 
+TexBig<sup>[[6]](#6)</sup> is a high-quality document layout dataset in the historical digital humanities domain. The dataset provides fine-grained annotations with 19 classes as well as instance segmentation level ground truth data in COCO format. 
 
-It has 1922 training samples and 335 validation samples. Mean average precision(mAP) in the validation samples are used for the evaluation metric in ablation study of different model configurations.
+It has 1922 training samples and 335 validation samples. Mean average precision(mAP) in the validation samples is used for the evaluation metric in the ablation study of different model configurations.
 
-To generalize the validation performance, data argumentation by using [Pytorch Transforms v2 library](https://pytorch.org/vision/main/auto_examples/plot_transforms_v2_e2e.html) is experimented in this study. Further details of the data augmentation will be discussed in section [Experiment Results](#experiment-results) and [Discussion and Analysis](#discussion-and-analysis). The visualization example of the ground-truth bounding boxes from one of the training samples is shown below:
+To generalize the validation performance, data argumentation by using [Pytorch Transforms v2 library](https://pytorch.org/vision/main/auto_examples/plot_transforms_v2_e2e.html) experiments in this study. Further details of the data augmentation will be discussed in sections [Experiment Results](#experiment-results) and [Discussion and Analysis](#discussion-and-analysis). The visualization example of the ground-truth bounding boxes from one of the training samples is shown below:
 | Without image transformations  |  After image transformations |
 |:------------------------------:|:----------------------------:|
-|![](/Users/kyle_lee/Desktop/Bauhaus/DL4CV/final-project-gary8564/images/ground-truth-no-transform.png)  |  ![](/Users/kyle_lee/Desktop/Bauhaus/DL4CV/final-project-gary8564/images/ground-truth-transforms.png)|
+|![ground-truth-no-transform](https://github.com/BUW-CV/final-project-gary8564/assets/54540162/b2093636-ef13-4e3e-b5be-b0fc87b0faf7)| ![ground-truth-transforms](https://github.com/BUW-CV/final-project-gary8564/assets/54540162/5daa1b8d-e67c-4c0a-8c1a-189bc824963a)|
 
 To fine-tune the aspect ratios of anchor boxes, the distribution of the aspect ratios of all annotated bounding boxes in the dataset is analyzed as below:
 |               | aspect ratio  | 
@@ -72,13 +72,13 @@ python train.py --datapath ... --batchsize ... --epochs ... --modelname ... --fr
 * `--datapath` is to input the root folder location where the TexBig dataset is stored.
 * `-batchsize` is to input the desired batch size. It is an optional input argument. By default, it is set to 2.
 * `--epochs` is to input the desired epochs. It is an optional input argument. By default, it is set to 10.
-* `--modelname` is to input the model name for training. It is an optional and limited input argument. Choices of the model name are "baseline", "EfficientNetFPN", "ResNeXT101FPN", "SwinTFPN", "SwinT", and "ViT". By default, it is set to "ResNeXT101FPN".
+* `--modelname is to input the model name for training. It is an optional and limited input argument. Choices of the model name are "baseline", "EfficientNetFPN", "ResNeXT101FPN", "SwinTFPN", "SwinT", and "ViT". By default, it is set to "ResNeXT101FPN".
 * `--frozen` is to input the desired frozen layer names. It is an optional input argument. By default, it is set to None.
 * `--scheduler` is to input whether to activate the StepLR learning rate scheduler (True/False). It is an optional input argument. By default, it is set to False.
 * `--warmup` is to input whether to activate the warmup learning rate (True/False). It is an optional input argument. By default, it is set to True.  
 
 (b) Testing
-Run the testing script to output the prediction results as a json file in [Kaggle notebook]() or open your terminal/command line from in the `src` directory and execute the following command:
+Run the testing script to output the prediction results as a json file in [Kaggle notebook]() or open your terminal/command line from the `src` directory and execute the following command:
 ```
 python test.py --backbone ... --weights ...
 ```
@@ -86,7 +86,7 @@ python test.py --backbone ... --weights ...
 * `--weights` is to input the trained model weights path.
 
 (c) Inference:
-To run inference of the trained models on a new data, open your terminal/command line from in the `src` directory and execute the following command: 
+To run inference of the trained models on new data, open your terminal/command line from the `src` directory and execute the following command: 
 ```
 python inference.py --input ... --threshold ... --model ... --weights ...
 ```
@@ -122,22 +122,21 @@ All of the source code for this project can be found in `src` folder:
   5. `train.py` contains the executable training script.
   6. `test.py` contains the executable test script to test a trained model version with corresponding 
       weights on a validation or test dataset and output the object detection results in a json file.
-  7. `inference.py` contains executable test inference of the trained models on a new data.
+  7. `inference.py` contains executable test inference of the trained models on new data.
 
 ## Experiment Results
 ### 1. Fine-tuning the baseline model - [pretrained RetinaNet](https://pytorch.org/vision/stable/models/generated/torchvision.models.detection.retinanet_resnet50_fpn_v2.html#torchvision.models.detection.retinanet_resnet50_fpn_v2) 
 #### Grid search hyperparameters of batch size, learning rate, and anchor boxes
-Warm-up StepLR scheduler first linearly increases the learning rate from initial learning rate of 0.0005 to 0.001 in the first 1000 iterations. After 1000 iterations, the learning rate decays by 0.75 after every 5 epochs. The visualization of the warm-up StepLR scheduler is shown as below:
+Warm-up StepLR scheduler first linearly increases the learning rate from an initial learning rate of 0.0005 to 0.001 in the first 1000 iterations. After 1000 iterations, the learning rate decays by 0.75 after every 5 epochs. The visualization of the warm-up StepLR scheduler is shown below:
 ![lr_scheduler](/Users/kyle_lee/Desktop/Bauhaus/DL4CV/final-project-gary8564/images/learning rate scheduler.png)
 Three different configurations are considered:
 * batch size = 4; optimizer = SGD; warm-up SetpLR scheduler
 * batch size = 2; optimizer = SGD; change parameters of anchor boxes
 * batch size = 2; optimizer = SGD; ; warm-up SetpLR scheduler; change parameters of anchor boxes
-The comparison results of three model configurations is shown as below:
+The comparison results of three model configurations are shown below:
 
 (1) Training and validation loss history 
-
-![fine-tune comparison](/Users/kyle_lee/Desktop/Bauhaus/DL4CV/final-project-gary8564/images/finetune_baseline.png)
+![finetune_baseline](https://github.com/BUW-CV/final-project-gary8564/assets/54540162/60ffd218-807e-43d6-a53a-632333b2538e)
 
 (2) mAP
 
@@ -149,9 +148,10 @@ The comparison results of three model configurations is shown as below:
 | config3       | 0.478         | 0.695           | 0.504           | 0.316          | 0.311          | 0.439          |
 
 ### 2. Ablation study
-The comparison results of different pretrained baackbone models are shown as below:
+The comparison results of different pre-trained backbone models are shown as follows:
 (1) Training and validation loss history 
-![fine-tune comparison](/Users/kyle_lee/Desktop/Bauhaus/DL4CV/final-project-gary8564/images/finetune_baseline.png)
+![backbones](https://github.com/BUW-CV/final-project-gary8564/assets/54540162/4bc13b28-a0a5-4cc3-9244-cfaebecef559)
+
 (2) mAP
 | backbones     | mAP           | mAP<sub>50</sub>| mAP<sub>75</sub>| mAP<sub>*s*</sub>| mAP<sub>*m*</sub>| mAP<sub>*l*</sub>|
 |:-------------:|:-------------:|:---------------:|:---------------:|:--------------:|:--------------:|:--------------:|
@@ -170,12 +170,12 @@ The result of mAP is shown below:
 | backbone      | mAP           | mAP<sub>50</sub>| mAP<sub>75</sub>| mAP<sub>*s*</sub>| mAP<sub>*m*</sub>| mAP<sub>*l*</sub>|
 |:-------------:|:-------------:|:---------------:|:---------------:|:--------------:|:--------------:|:--------------:|
 | [ResNeXT101](https://pytorch.org/vision/main/models/resnext.html) | 0.546 |   0.775 |  0.608  | 0.341  |  0.347  |  0.528 |
-The above results shows that data augmentation can increase mAP by 6.6%.
+The above results show that data augmentation can increase mAP by 6.6%.
 
 #### 4. Final results
 Retrain the best configuration (ResNeXT101-backbone; batch size=2; SGD with learning rate=0.001; warmup StepLR scheduler). 
 The model weights can be downloaded [here](https://www.kaggle.com/datasets/gary8564/texbigdataset-trained-models).
-The result of mAP is shown as below:
+The result of mAP is shown as follows:
 
 | retrain epochs| mAP           | mAP<sub>50</sub>| mAP<sub>75</sub>| mAP<sub>*s*</sub>| mAP<sub>*m*</sub>| mAP<sub>*l*</sub>| download |
 |:-------------:|:-------------:|:---------------:|:---------------:|:--------------:|:--------------:|:--------------:|:--------------:|
@@ -185,20 +185,25 @@ The result of mAP is shown as below:
 The comparison between the prediction of the final model and the ground-truth annotations is visualized below:
 | Groud-Truths  |  Predictions |
 |:------------------------------:|:----------------------------:|
-|![](/Users/kyle_lee/Desktop/Bauhaus/DL4CV/final-project-gary8564/images/ground-truth1.png)  |  ![](/Users/kyle_lee/Desktop/Bauhaus/DL4CV/final-project-gary8564/images/prediction1.png)|
-|![](/Users/kyle_lee/Desktop/Bauhaus/DL4CV/final-project-gary8564/images/ground-truth2.png)  |  ![](/Users/kyle_lee/Desktop/Bauhaus/DL4CV/final-project-gary8564/images/prediction2.png)|
-|![](/Users/kyle_lee/Desktop/Bauhaus/DL4CV/final-project-gary8564/images/ground-truth3.png)  |  ![](/Users/kyle_lee/Desktop/Bauhaus/DL4CV/final-project-gary8564/images/prediction3.png)|
+|  ![ground-truth1](https://github.com/BUW-CV/final-project-gary8564/assets/54540162/7a633d50-fafd-438f-b683-3d55b7133c4b)
+ | ![prediction1](https://github.com/BUW-CV/final-project-gary8564/assets/54540162/d67e999e-e71a-4dac-8266-0ef0b98c797e)
+ |
+| ![ground-truth2](https://github.com/BUW-CV/final-project-gary8564/assets/54540162/5689ea3f-0a80-4ce4-adbe-2ed68ae4240a)
+ | ![prediction2](https://github.com/BUW-CV/final-project-gary8564/assets/54540162/619fcb4d-67d7-48f3-a523-82e2c851ef44)
+ |
+| ![ground-truth3](https://github.com/BUW-CV/final-project-gary8564/assets/54540162/8fcb1bb6-889f-473c-be23-f770c5c51fee)
+ | ![prediction3](https://github.com/BUW-CV/final-project-gary8564/assets/54540162/808b6aaf-4e96-48f1-9466-1f1f8fadc514) |
 
 
 ## Discussion and Analysis
 1. Learning rates:
-If the learning rate is set above 0.005, the model tends to diverge. It’s common to use a smaller learning rate for pretrained model, in comparison to the (randomly-initialized) weights. This is because we expect that the pretrained weights are relatively good, so we don’t wish to distort them too quickly and too much. <sup>[[7]](#7)</sup>
+If the learning rate is set above 0.005, the model tends to diverge. It’s common to use a smaller learning rate for pre-trained models, in comparison to the (randomly initialized) weights. This is because we expect that the pre-trained weights are relatively good, so we don’t wish to distort them too quickly and too much. <sup>[[7]](#7)</sup>
 
 2. Anchor boxes:
 Anchor boxes are one of the most influential hyperparameters to fine-tune. This can be proved in the baseline fine-tuning stage. Since most of the data contain smaller aspect ratios, I chose to add more anchor boxes and set smaller aspect ratios. The result of mAP is surprisingly improved by 10%.
 
 3. Optimizers:
-At the first stage of fine-tuning, Adam-based optimizers such as Adam, AdamW, or RAdam are chosen as optimizers. However, during the training process, the validation loss of using Adam-based optimizers is worse than using SGD with Nesterov momentum. Numerous paper<sup>[8](#8),[9](#9),[10](#10)</sup> has also pointed out that Adam's generalization performance is worse than SGD, especially on image classification problems. More recent paper<sup>[11](#11)</sup> further clarified that fine-tuned Adam is always better than SGD, while there exists a performance gap between Adam and SGD when using default hyperparameters. Since it might be difficult to find the optimal hyperparameters and the original paper of RetinaNet also used SGD optimizer, I therefore focused only on SGD optimizer. 
+At the first stage of fine-tuning, Adam-based optimizers such as Adam, AdamW, or RAdam are chosen as optimizers. However, during the training process, the validation loss of using Adam-based optimizers is worse than using SGD with Nesterov momentum. Numerous paper<sup>[8](#8),[9](#9),[10](#10)</sup> has also pointed out that Adam's generalization performance is worse than SGD, especially on image classification problems. A more recent paper<sup>[11](#11)</sup> further clarified that fine-tuned Adam is always better than SGD, while there exists a performance gap between Adam and SGD when using default hyperparameters. Since it might be difficult to find the optimal hyperparameters and the original paper of RetinaNet also used SGD optimizer, I, therefore, focused only on SGD optimizer. 
 
 3. Backbones:
 (1) Transformers-based backbones:
@@ -207,17 +212,17 @@ In order to fit in the constraints of training capacity, most of the encoder lay
 Even though the result is not promising, the above mAP results can still get another interesting observation: SwinT transformers have more learning capacity to detect smaller objects.
 
 (2) ResNeXT and EfficientNet:
-In order to speed up the training process, `nn.DataParallel` is utilized to fit with the Kaggle GPU-T4x2 accelerator. The above ablation study indicates that both EfficientNet and ResNeXT yield outstanding performances. Still, mAP of ResNeXT-backbone model is 
+In order to speed up the training process, `nn.DataParallel` is utilized to fit with the Kaggle GPU-T4x2 accelerator. The above ablation study indicates that both EfficientNet and ResNeXT yield outstanding performances. Still, mAP of the ResNeXT-backbone model is 
  
 
 ## Outlook and Future Work
-In conclusion, despite the complexity of historical documents dataset, by fine-tuning hyperparameters and increase backbone model complexities, RetinaNet is still able to detect most of the annotations. Even though mAP on the test dataset leaderboard can only achieve 0.21, the performance can be improved by training more epochs if more powerful computing units can be accessed. More laborious fine-tuning with anchor boxes might also lead to more promising results.
-In future work, unfreezing layers of ViT and SwinT backbone can be further experimented to check for the improvement of results. Future studies can also try to implement other more recent methodology such as VitDet<sup>[12](#12)</sup>, which utilized plain ViT-backbone with simple feature pyramid maps structure. In ViTDet paper, the author also points out that the results can be benefited from using the readily available pretrained transformer models from Masked Autoencoder(MAE). Therefore, using the pretrained model from MAE can also be further discussed.
+In conclusion, despite the complexity of the historical documents dataset, by fine-tuning hyperparameters and increasing backbone model complexities, RetinaNet is still able to detect most of the annotations. Even though mAP on the test dataset leaderboard can only achieve 0.21, the performance can be improved by training more epochs if more powerful computing units can be accessed. More laborious fine-tuning with anchor boxes might also lead to more promising results.
+In future work, unfreezing layers of ViT and SwinT backbone can be further experimented with to check for the improvement of results. Future studies can also try to implement other more recent methodologies such as VitDet<sup>[12](#12)</sup>, which utilized plain ViT-backbone with simple feature pyramid maps. In the ViTDet paper, the author also points out that the results can be benefited from using the readily available pre-trained transformer models from Masked Autoencoder(MAE). Therefore, using the pre-trained model from MAE can also be further discussed.
 
 ## Citation
 <a id="1">[[1]](https://arxiv.org/abs/2212.13924)</a> N.-M. Sven and R. Matteo, “Page layout analysis of text-heavy historical documents: A comparison of textual and visual approaches,” arXiv [cs.IR], 2022.
 
-<a id="2">[[2]](https://arxiv.org/abs/2105.06220)</a> Zhang, P. (2021, May 13). VSR: A Unified Framework for Document Layout Analysis combining Vision, Semantics and Relations. arXiv.org.
+<a id="2">[[2]](https://arxiv.org/abs/2105.06220)</a> Zhang, P. (2021, May 13). VSR: A Unified Framework for Document Layout Analysis combining Vision, Semantics, and Relations. arXiv.org.
 
 <a id="3">[[3]](https://arxiv.org/abs/1708.02002)</a> Lin, T. (2017). Focal Loss for Dense Object Detection. arXiv.org.
 
