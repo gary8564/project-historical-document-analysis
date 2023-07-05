@@ -67,9 +67,8 @@ Install the repository in editable mode. Example for MacOS/Linux(Ubuntu):
 
 
 ## Usage
-(a) Training
-····Run the training script from Kaggle notebook or open your terminal/command line from in the `src` directory and execute the 
-····following command: 
+### 1. Training
+Run the training script from Kaggle notebook or open your terminal/command line from in the `src` directory and execute the following command: 
 
 ```
 python train.py --datapath ... --batchsize ... --epochs ... --modelname ... --frozen ... --scheduler ... --warmup ...
@@ -82,16 +81,16 @@ python train.py --datapath ... --batchsize ... --epochs ... --modelname ... --fr
 * `--scheduler` is to input whether to activate the StepLR learning rate scheduler (True/False). It is an optional input argument. By default, it is set to False.
 * `--warmup` is to input whether to activate the warmup learning rate (True/False). It is an optional input argument. By default, it is set to True.  
 
-(b) Testing
-····Run the testing script to output the prediction results as a json file in Kaggle notebook or open your terminal/command ····line from the `src` directory and execute the following command:
+### 2. Testing
+Run the testing script to output the prediction results as a json file in Kaggle notebook or open your terminal/command ····line from the `src` directory and execute the following command:
 ```
 python test.py --backbone ... --weights ...
 ```
 * `--backbone` is to input the desired backbone model name. Choices are limited to 'baseline', 'EfficientNetFPN', and 'ResNeXT101FPN'. It is an optional input argument. By default, it is set to 'ResNeXT101FPN'.
 * `--weights` is to input the trained model weights path.
 
-(c) Inference:
-····To run inference of the trained models on new data, open your terminal/command line from the `src` directory and execute ····the following command: 
+### 3. Inference
+To run inference of the trained models on new data, open your terminal/command line from the `src` directory and execute ····the following command: 
 ```
 python inference.py --input ... --threshold ... --model ... --weights ...
 ```
@@ -133,14 +132,15 @@ All of the source code for this project can be found in `src` folder:
 ### 1. Fine-tuning the baseline model - [pretrained RetinaNet](https://pytorch.org/vision/stable/models/generated/torchvision.models.detection.retinanet_resnet50_fpn_v2.html#torchvision.models.detection.retinanet_resnet50_fpn_v2) 
 #### Grid search hyperparameters of batch size, learning rate, and anchor boxes
 Warm-up StepLR scheduler first linearly increases the learning rate from an initial learning rate of 0.0005 to 0.001 in the first 1000 iterations. After 1000 iterations, the learning rate decays by 0.75 after every 5 epochs. The visualization of the warm-up StepLR scheduler is shown below:
-![lr_scheduler](/Users/kyle_lee/Desktop/Bauhaus/DL4CV/final-project-gary8564/images/learning rate scheduler.png)
+![learing rate scheduler](https://github.com/BUW-CV/final-project-gary8564/assets/54540162/961b7894-af94-41b3-949f-535efdd1e4d4)
+
+
 Three different configurations are considered:
 * batch size = 4; optimizer = SGD; warm-up SetpLR scheduler
 * batch size = 2; optimizer = SGD; change parameters of anchor boxes
 * batch size = 2; optimizer = SGD; ; warm-up SetpLR scheduler; change parameters of anchor boxes
-The comparison results of three model configurations are shown below:
-
-(1) Training and validation loss history 
+The comparison results of three model configurations are shown below:\
+(1) Training and validation loss history
 ![finetune_baseline](https://github.com/BUW-CV/final-project-gary8564/assets/54540162/60ffd218-807e-43d6-a53a-632333b2538e)
 
 (2) mAP
