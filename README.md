@@ -141,7 +141,7 @@ The comparison results of three model configurations is shown as below:
 
 (2) mAP
 
-| model configs | mAP           | mAP<sub>50</sub>| mAP<sub>75</sub>| mAP<sub>s</sub>| mAP<sub>m</sub>| mAP<sub>l</sub>|
+| model configs | mAP           | mAP<sub>50</sub>| mAP<sub>75</sub>| mAP<sub>*s*</sub>| mAP<sub>*m*</sub>| mAP<sub>*l*</sub>|
 |:-------------:|:-------------:|:---------------:|:---------------:|:--------------:|:--------------:|:--------------:|
 | baseline      | 0.447         | 0.655           | 0.484           | 0.334          | 0.293          | 0.423          |
 | config1       | 0.454         | 0.647           | 0.478           | 0.285          | 0.268          | 0.429          |  
@@ -153,7 +153,7 @@ The comparison results of different pretrained baackbone models are shown as bel
 (1) Training and validation loss history 
 ![fine-tune comparison](/Users/kyle_lee/Desktop/Bauhaus/DL4CV/final-project-gary8564/images/finetune_baseline.png)
 (2) mAP
-| backbones     | mAP           | mAP<sub>50</sub>| mAP<sub>75</sub>| mAP<sub>s</sub>| mAP<sub>m</sub>| mAP<sub>l</sub>|
+| backbones     | mAP           | mAP<sub>50</sub>| mAP<sub>75</sub>| mAP<sub>*s*</sub>| mAP<sub>*m*</sub>| mAP<sub>*l*</sub>|
 |:-------------:|:-------------:|:---------------:|:---------------:|:--------------:|:--------------:|:--------------:|
 | no feature pyramids |||||||
 | [Vit](https://pytorch.org/vision/stable/models/vision_transformer.html)| 0.220| 0.324 | 0.224 | 0.004 | 0.015 | 0.236 |
@@ -167,7 +167,7 @@ The comparison results of different pretrained baackbone models are shown as bel
 From the ablation study, ResNeXT101 as backbone yields the most promising result. Therefore, in this section, only ResNeXT101 backbone is considered.
 To improve the generalization, data augmentation using several image transformation techniques is implemented. In this study, RandomHorizontalFlip and ColorJitter are implemented. 
 The result of mAP is shown below:
-| backbone      | mAP           | mAP<sub>50</sub>| mAP<sub>75</sub>| mAP<sub>s</sub>| mAP<sub>m</sub>| mAP<sub>l</sub>|
+| backbone      | mAP           | mAP<sub>50</sub>| mAP<sub>75</sub>| mAP<sub>*s*</sub>| mAP<sub>*m*</sub>| mAP<sub>*l*</sub>|
 |:-------------:|:-------------:|:---------------:|:---------------:|:--------------:|:--------------:|:--------------:|
 | [ResNeXT101](https://pytorch.org/vision/main/models/resnext.html) | 0.546 |   0.775 |  0.608  | 0.341  |  0.347  |  0.528 |
 The above results shows that data augmentation can increase mAP by 6.6%.
@@ -176,9 +176,11 @@ The above results shows that data augmentation can increase mAP by 6.6%.
 Retrain the best configuration (ResNeXT101-backbone; batch size=2; SGD with learning rate=0.001; warmup StepLR scheduler)
 The result of mAP is shown as below:
 
-| backbone      | mAP           | mAP<sub>50</sub>| mAP<sub>75</sub>| mAP<sub>s</sub>| mAP<sub>m</sub>| mAP<sub>l</sub>|
-|:-------------:|:-------------:|:---------------:|:---------------:|:--------------:|:--------------:|:--------------:|
-| [ResNeXT101](https://pytorch.org/vision/main/models/resnext.html) | 0.546 |   0.775 |  0.608  | 0.341  |  0.347  |  0.528 |
+| retrain epochs| mAP           | mAP<sub>50</sub>| mAP<sub>75</sub>| mAP<sub>*s*</sub>| mAP<sub>*m*</sub>| mAP<sub>*l*</sub>| download |
+|:-------------:|:-------------:|:---------------:|:---------------:|:--------------:|:--------------:|:--------------:|:--------------:|
+| 8 \ Leaderboard version | 0.610 |   0.802 |  0.654  | 0.361  |  0.428  |  0.599 | [link](https://drive.google.com/file/d/1hhoe8fKb2BuQbXcQ1llpOqRZZ-8M_xjz/view?usp=sharing)|
+| 8 \ Leaderboard version | 0.624 |   0.827 |  0.680  | 0.374  |  0.444  |  0.611 | [link](https://drive.google.com/file/d/15Fo95F_36xolUSnw3OvQm36mCiHPTBrm/view?usp=sharing)|
+
 The comparison between the prediction of the final model and the ground-truth annotations is visualized below:
 | Groud-Truths  |  Predictions |
 |:------------------------------:|:----------------------------:|
