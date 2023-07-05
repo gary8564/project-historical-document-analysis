@@ -186,11 +186,9 @@ The comparison between the prediction of the final model and the ground-truth an
 | Groud-Truths  |  Predictions |
 |:------------------------------:|:----------------------------:|
 |  ![ground-truth1](https://github.com/BUW-CV/final-project-gary8564/assets/54540162/7a633d50-fafd-438f-b683-3d55b7133c4b) | ![prediction1](https://github.com/BUW-CV/final-project-gary8564/assets/54540162/d67e999e-e71a-4dac-8266-0ef0b98c797e) |
-
 | ![ground-truth2](https://github.com/BUW-CV/final-project-gary8564/assets/54540162/5689ea3f-0a80-4ce4-adbe-2ed68ae4240a)|
  ![prediction2](https://github.com/BUW-CV/final-project-gary8564/assets/54540162/619fcb4d-67d7-48f3-a523-82e2c851ef44) |
- 
-| ![ground-truth3](https://github.com/BUW-CV/final-project-gary8564/assets/54540162/8fcb1bb6-889f-473c-be23-f770c5c51fee) | ![prediction3](https://github.com/BUW-CV/final-project-gary8564/assets/54540162/808b6aaf-4e96-48f1-9466-1f1f8fadc514) |
+ | ![ground-truth3](https://github.com/BUW-CV/final-project-gary8564/assets/54540162/8fcb1bb6-889f-473c-be23-f770c5c51fee) | ![prediction3](https://github.com/BUW-CV/final-project-gary8564/assets/54540162/808b6aaf-4e96-48f1-9466-1f1f8fadc514) |
 
 
 ## Discussion and Analysis
