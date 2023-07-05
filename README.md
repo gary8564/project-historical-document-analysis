@@ -210,14 +210,14 @@ Anchor boxes are one of the most influential hyperparameters to fine-tune. This 
 3. Optimizers:
 At the first stage of fine-tuning, Adam-based optimizers such as Adam, AdamW, or RAdam are chosen as optimizers. However, during the training process, the validation loss of using Adam-based optimizers is worse than using SGD with Nesterov momentum. Numerous paper<sup>[[8]](#8),[[9]](#9),[[10]](#10)</sup> has also pointed out that Adam's generalization performance is worse than SGD, especially on image classification problems. A more recent paper<sup>[[11]](#11)</sup> further clarified that fine-tuned Adam is always better than SGD, while there exists a performance gap between Adam and SGD when using default hyperparameters. Since it might be difficult to find the optimal hyperparameters and the original paper of RetinaNet also used SGD optimizer, I, therefore, focused only on SGD optimizer. 
 
-3. Backbones:
-   (1) Transformers-based backbones:
+3. Backbones:\
+   (1) Transformers-based backbones:\
        In order to fit in the constraints of training capacity, most of the encoder layers are frozen. However, freezing large
        portion of layers also led to unpromising results. It may be difficult to learn and fit into this complex and domain
        specific large dataset if freezing most parts of the model architecture.\
        Even though the result is not promising, the above mAP results can still get another interesting observation: SwinT
        transformers have more learning capacity to detect smaller objects.
-   (2) ResNeXT and EfficientNet:
+   (2) ResNeXT and EfficientNet:\
        In order to speed up the training process, `nn.DataParallel` is utilized to fit with the Kaggle GPU-T4x2 accelerator.
        The above ablation study indicates that both EfficientNet and ResNeXT yield outstanding performances. In particular,
        ResNeXT-backbone model exceptionally outperforms others. 
