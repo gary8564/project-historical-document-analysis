@@ -64,7 +64,7 @@ Install the repository in editable mode. Example for MacOS/Linux(Ubuntu):
 
 ## Usage
 (a) Training
-Run the training script from [Kaggle notebook]() or open your terminal/command line from in the `src` directory and execute the following command: 
+Run the training script from Kaggle notebook or open your terminal/command line from in the `src` directory and execute the following command: 
 
 ```
 python train.py --datapath ... --batchsize ... --epochs ... --modelname ... --frozen ... --scheduler ... --warmup ...
@@ -173,7 +173,8 @@ The result of mAP is shown below:
 The above results shows that data augmentation can increase mAP by 6.6%.
 
 #### 4. Final results
-Retrain the best configuration (ResNeXT101-backbone; batch size=2; SGD with learning rate=0.001; warmup StepLR scheduler)
+Retrain the best configuration (ResNeXT101-backbone; batch size=2; SGD with learning rate=0.001; warmup StepLR scheduler). 
+The model weights can be downloaded [here](https://www.kaggle.com/datasets/gary8564/texbigdataset-trained-models).
 The result of mAP is shown as below:
 
 | retrain epochs| mAP           | mAP<sub>50</sub>| mAP<sub>75</sub>| mAP<sub>*s*</sub>| mAP<sub>*m*</sub>| mAP<sub>*l*</sub>| download |
