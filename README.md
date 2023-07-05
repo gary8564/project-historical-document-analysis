@@ -180,8 +180,11 @@ The result of mAP is shown as follows:
 
 | retrain epochs| mAP           | mAP<sub>50</sub>| mAP<sub>75</sub>| mAP<sub>*s*</sub>| mAP<sub>*m*</sub>| mAP<sub>*l*</sub>| download |
 |:-------------:|:-------------:|:---------------:|:---------------:|:--------------:|:--------------:|:--------------:|:--------------:|
-| 8 \ Leaderboard version | 0.610 |   0.802 |  0.654  | 0.361  |  0.428  |  0.599 | [link](https://drive.google.com/file/d/1hhoe8fKb2BuQbXcQ1llpOqRZZ-8M_xjz/view?usp=sharing)|
-| 8 \ Leaderboard version | 0.624 |   0.827 |  0.680  | 0.374  |  0.444  |  0.611 | [link](https://drive.google.com/file/d/15Fo95F_36xolUSnw3OvQm36mCiHPTBrm/view?usp=sharing)|
+| 8<sup>[*](#note)</sup> | 0.610 |   0.802 |  0.654  | 0.361  |  0.428  |  0.599 | [link](https://drive.google.com/file/d/1hhoe8fKb2BuQbXcQ1llpOqRZZ-8M_xjz/view?usp=sharing)|
+| 16 | 0.624 |   0.827 |  0.680  | 0.374  |  0.444  |  0.611 | [link](https://drive.google.com/file/d/15Fo95F_36xolUSnw3OvQm36mCiHPTBrm/view?usp=sharing)|
+
+* Note: the retrained model of 8 epochs is the result on the leaderboard.
+
 
 The comparison between the prediction of the final model and the ground-truth annotations is visualized below:
 | Groud-Truths  |  Predictions |
