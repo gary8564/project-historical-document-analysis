@@ -170,9 +170,15 @@ The result of mAP is shown below:
 | backbone      | mAP           | mAP<sub>50</sub>| mAP<sub>75</sub>| mAP<sub>s</sub>| mAP<sub>m</sub>| mAP<sub>l</sub>|
 |:-------------:|:-------------:|:---------------:|:---------------:|:--------------:|:--------------:|:--------------:|
 | [ResNeXT101](https://pytorch.org/vision/main/models/resnext.html) | 0.546 |   0.775 |  0.608  | 0.341  |  0.347  |  0.528 |
+The above results shows that data augmentation can increase mAP by 6.6%.
 
 #### 4. Final results
-Retrain the best configuration for 8 epochs (ResNeXT101-backbone; batch size=2; SGD with learning rate=0.001; warmup StepLR scheduler)
+Retrain the best configuration (ResNeXT101-backbone; batch size=2; SGD with learning rate=0.001; warmup StepLR scheduler)
+The result of mAP is shown as below:
+
+| backbone      | mAP           | mAP<sub>50</sub>| mAP<sub>75</sub>| mAP<sub>s</sub>| mAP<sub>m</sub>| mAP<sub>l</sub>|
+|:-------------:|:-------------:|:---------------:|:---------------:|:--------------:|:--------------:|:--------------:|
+| [ResNeXT101](https://pytorch.org/vision/main/models/resnext.html) | 0.546 |   0.775 |  0.608  | 0.341  |  0.347  |  0.528 |
 The comparison between the prediction of the final model and the ground-truth annotations is visualized below:
 | Groud-Truths  |  Predictions |
 |:------------------------------:|:----------------------------:|
@@ -189,7 +195,7 @@ If the learning rate is set above 0.005, the model tends to diverge. It’s comm
 Anchor boxes are one of the most influential hyperparameters to fine-tune. This can be proved in the baseline fine-tuning stage. Since most of the data contain smaller aspect ratios, I chose to add more anchor boxes and set smaller aspect ratios. The result of mAP is surprisingly improved by 10%.
 
 3. Optimizers:
-At the first stage of fine-tuning, Adam-based optimizers such as Adam, AdamW, or RAdam are chosen as optimizers. However, during the training process, the validation loss of using Adam-based optimizers is worse than using SGD with Nesterov momentum. Numerous paper<sup>[8](#8),[9](#9),[10](#10)</sup> has also pointed out that Adam's generalization performance is worse than SGD, especially on image classification problems. More recent paper<sup>[11](#11)</sup> further clarified that fine-tuned Adam is always better than SGD, while there exists a performance gap between Adam and SGD when using default hyperparameters. Since it might be difficult to find the optimal hyperparameters and the original paper of RetinaNet<sup>[12](#12)</sup> also used SGD optimizer, I therefore focused only on SGD optimizer. 
+At the first stage of fine-tuning, Adam-based optimizers such as Adam, AdamW, or RAdam are chosen as optimizers. However, during the training process, the validation loss of using Adam-based optimizers is worse than using SGD with Nesterov momentum. Numerous paper<sup>[8](#8),[9](#9),[10](#10)</sup> has also pointed out that Adam's generalization performance is worse than SGD, especially on image classification problems. More recent paper<sup>[11](#11)</sup> further clarified that fine-tuned Adam is always better than SGD, while there exists a performance gap between Adam and SGD when using default hyperparameters. Since it might be difficult to find the optimal hyperparameters and the original paper of RetinaNet also used SGD optimizer, I therefore focused only on SGD optimizer. 
 
 3. Backbones:
 (1) Transformers-based backbones:
@@ -203,7 +209,7 @@ In order to speed up the training process, `nn.DataParallel` is utilized to fit 
 
 ## Outlook and Future Work
 In conclusion, despite the complexity of historical documents dataset, by fine-tuning hyperparameters and increase backbone model complexities, RetinaNet is still able to detect most of the annotations. Even though mAP on the test dataset leaderboard can only achieve 0.21, the performance can be improved by training more epochs if more powerful computing units can be accessed. More laborious fine-tuning with anchor boxes might also lead to more promising results.
-In future work, unfreezing layers of ViT and SwinT backbone can be further experimented to check for the improvement of results. Future studies can also try to implement other more recent methodology such as VitDet<sup>[13](#13)</sup>, which utilized plain ViT-backbone with simple feature pyramid maps structure. In ViTDet paper, the author also points out that the results can be benefited from using the readily available pretrained transformer models from Masked Autoencoder(MAE). Therefore, using the pretrained model from MAE can also be further discussed.
+In future work, unfreezing layers of ViT and SwinT backbone can be further experimented to check for the improvement of results. Future studies can also try to implement other more recent methodology such as VitDet<sup>[12](#12)</sup>, which utilized plain ViT-backbone with simple feature pyramid maps structure. In ViTDet paper, the author also points out that the results can be benefited from using the readily available pretrained transformer models from Masked Autoencoder(MAE). Therefore, using the pretrained model from MAE can also be further discussed.
 
 ## Citation
 <a id="1">[[1]](https://arxiv.org/abs/2212.13924)</a> N.-M. Sven and R. Matteo, “Page layout analysis of text-heavy historical documents: A comparison of textual and visual approaches,” arXiv [cs.IR], 2022.
@@ -220,14 +226,12 @@ In future work, unfreezing layers of ViT and SwinT backbone can be further exper
 
 <a id="7">[[7]](https://cs231n.github.io/transfer-learning/)</a> Transfer Learning. Stanford CS231n: Convolutional Neural Networks for Visual Recognition.
 
-https://arxiv.org/pdf/1712.07628.pdf
+<a id="8">[[8]](https://arxiv.org/abs/1712.07628)</a> Keskar, N. S. (2017). Improving Generalization Performance by Switching from Adam to SGD. arXiv.org. 
 
-https://opt-ml.org/papers/2021/paper53.pdf
+<a id="9">[[9]](https://arxiv.org/abs/1712.07628)</a> Keskar, N. S. (2017b, December 20). Improving Generalization Performance by Switching from Adam to SGD. arXiv.org. 
 
-https://arxiv.org/pdf/1509.01240.pdf
+<a id="10">[[10]](https://arxiv.org/abs/1509.01240)</a> Hardt, M. (2015, September 3). Train faster, generalize better: Stability of stochastic gradient descent. arXiv.org. 
 
-https://arxiv.org/pdf/1910.05446.pdf
+<a id="11">[[11]](https://arxiv.org/abs/1910.05446)</a> Choi, D. (2019, October 11). On Empirical Comparisons of Optimizers for Deep Learning. arXiv.org. 
 
-https://arxiv.org/pdf/1708.02002v2.pdf
-
-https://arxiv.org/pdf/2203.16527.pdf
+<a id="12">[[12]](https://arxiv.org/abs/2203.16527)</a> Li, Y. (2022, March 30). Exploring Plain Vision Transformer Backbones for Object Detection. arXiv.org. 
