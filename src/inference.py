@@ -21,7 +21,7 @@ if __name__ == "__main__":
                     help='baseline model(retinanet_resnet50_fpn_v2), RetinaNet with EfficientNet FPN, \
                         RetinaNet with ResNeXT101 FPN',
                     choices=['baseline', 'EfficientNetFPN', 'ResNeXT101FPN'])
-    parser.add_argument('-w', '--weights', default='../pretrained/model_ResNeXt_FPN_RetinaNet_retrain.pt',
+    parser.add_argument('-w', '--weights', default='../pretrained/final_model.pt',
                     help='trained model weight path')
     args = vars(parser.parse_args())
 

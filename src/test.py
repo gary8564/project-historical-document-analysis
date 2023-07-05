@@ -13,10 +13,11 @@ if __name__ == "__main__":
     from src import *
     
     # Construct the argument parser.
+    parser = argparse.ArgumentParser() 
     parser.add_argument('-m', '--backbone', default='ResNeXT101FPN', 
                     help='baseline(ResNet50), EfficientNet wtih FPN, ResNeXT101 with FPN',
                     choices=['baseline', 'EfficientNetFPN', 'ResNeXT101FPN'])
-    parser.add_argument('-w', '--weights', default='/pretrained/model_ResNeXt_FPN_RetinaNet_retrain.pt',
+    parser.add_argument('-w', '--weights', default='/pretrained/final_model.pt',
                     help='trained model weight path')
     args = vars(parser.parse_args())
     

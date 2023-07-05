@@ -1,3 +1,5 @@
+import argparse
+
 if __name__ == '__main__':
     # append system path
     import sys
@@ -8,6 +10,7 @@ if __name__ == '__main__':
     from torch.utils.data import DataLoader, random_split
     
     # Construct the argument parser.
+    parser = argparse.ArgumentParser() 
     parser.add_argument('-d', '--datapath',
                     help='TexBig dataset root folder')
     parser.add_argument('-b', '--batchsize', default=2,
@@ -18,12 +21,14 @@ if __name__ == '__main__':
                     help='model name',
                     choices=["baseline", "EfficientNetFPN", "ResNeXT101FPN", 
                              "SwinTFPN", "SwinT", "ViT"])
-    parser.add_argument('-f', '--frozen', default=None,
-                    help='frozen layers name')
+    parser.add_argument('-f', '--frozen', default=None, nargs='*',
+                    help='frozen layer names')
     parser.add_argument('-s', '--scheduler', default=False,
-                    help='whether to activate learning rate schedueler (boolean: true/false)')
+                    help='whether to activate learning rate schedueler (boolean: true/false)',
+                    choices=[True, False])
     parser.add_argument('-w', '--warmup', default=True,
-                    help='whether to activate learning rate warmup (boolean: true/false)')
+                    help='whether to activate learning rate warmup (boolean: true/false)',
+                    choices=[True, False])
     
     args = vars(parser.parse_args())
 

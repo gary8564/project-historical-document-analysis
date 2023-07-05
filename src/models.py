@@ -160,7 +160,7 @@ def retinaNet(num_classes, device, backbone=None, anchor_sizes=None, aspect_rati
         model = RetinaNet(
             backbone=backboneModel,
             num_classes=num_classes,
-            anchor_generator=anchorGenerator(anchorSizes, aspectRatios),
+            anchor_generator=AnchorGenerator(anchorSizes, aspectRatios),
         )
         if backbone == "ViT":
             model.transform = GeneralizedRCNNTransform(min_size=224, max_size=256, image_mean=[0.485, 0.456, 0.406], 
