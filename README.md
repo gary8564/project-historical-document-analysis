@@ -216,7 +216,7 @@ At the first stage of fine-tuning, Adam-based optimizers such as Adam, AdamW, or
        portion of layers also led to unpromising results. It may be difficult to learn and fit into this complex and domain
        specific large dataset if freezing most parts of the model architecture.\
        Even though the result is not promising, the above mAP results can still get another interesting observation: SwinT
-       transformers have more learning capacity to detect smaller objects.
+       transformers have more learning capacity to detect smaller objects.\
    (2) ResNeXT and EfficientNet:\
        In order to speed up the training process, `nn.DataParallel` is utilized to fit with the Kaggle GPU-T4x2 accelerator.
        The above ablation study indicates that both EfficientNet and ResNeXT yield outstanding performances. In particular,
