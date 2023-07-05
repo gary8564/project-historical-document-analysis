@@ -212,15 +212,15 @@ At the first stage of fine-tuning, Adam-based optimizers such as Adam, AdamW, or
 
 3. Backbones:\
    (1) Transformers-based backbones:\
-   &emsp;In order to fit in the constraints of training capacity, most of the encoder layers are frozen. However, freezing large
-   portions of layers also\
-   &emsp;led to unpromising results. It may be difficult to learn and fit into this complex domain-specific large dataset if freezing most parts of the model architecture.\
-   &emsp;Even though the result is not promising, the above mAP results can still get another interesting observation: SwinT
+   In order to fit in the constraints of training capacity, most of the encoder layers are frozen. However, freezing large
+   portions of layers also led to unpromising results. It may be difficult to learn and fit into this complex domain-specific large dataset if freezing most parts of the model architecture.\
+
+   Even though the result is not promising, the above mAP results can still get another interesting observation: SwinT
    transformers have more learning capacity to detect smaller objects.\
+   
    (2) ResNeXT and EfficientNet:\
-   &emsp;In order to speed up the training process, `nn.DataParallel` is utilized to fit with the Kaggle GPU-T4x2 accelerator.\
-   &emsp;The above ablation study indicates that both EfficientNet and ResNeXT yield outstanding performances. In particular, ResNeXT-\
-   &emsp;backbone model exceptionally outperforms others.\
+   In order to speed up the training process, `nn.DataParallel` is utilized to fit with the Kaggle GPU-T4x2 accelerator. The above ablation study indicates that both EfficientNet and ResNeXT yield outstanding performances. In particular, ResNeXT-\
+   backbone model exceptionally outperforms others.\
  
 
 ## Outlook and Future Work
