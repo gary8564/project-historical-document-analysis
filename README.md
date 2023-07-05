@@ -139,6 +139,7 @@ Three different configurations are considered:
 * batch size = 4; optimizer = SGD; warm-up SetpLR scheduler
 * batch size = 2; optimizer = SGD; change parameters of anchor boxes
 * batch size = 2; optimizer = SGD; ; warm-up SetpLR scheduler; change parameters of anchor boxes
+
 The comparison results of three model configurations are shown below:\
 (1) Training and validation loss history
 ![finetune_baseline](https://github.com/BUW-CV/final-project-gary8564/assets/54540162/60ffd218-807e-43d6-a53a-632333b2538e)
