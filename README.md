@@ -134,9 +134,13 @@ Three different configurations are considered:
 * batch size = 2; optimizer = SGD; change parameters of anchor boxes
 * batch size = 2; optimizer = SGD; ; warm-up SetpLR scheduler; change parameters of anchor boxes
 The comparison results of three model configurations is shown as below:
+
 (1) Training and validation loss history 
+
 ![fine-tune comparison](/Users/kyle_lee/Desktop/Bauhaus/DL4CV/final-project-gary8564/images/finetune_baseline.png)
+
 (2) mAP
+
 | model configs | mAP           | mAP<sub>50</sub>| mAP<sub>75</sub>| mAP<sub>s</sub>| mAP<sub>m</sub>| mAP<sub>l</sub>|
 |:-------------:|:-------------:|:---------------:|:---------------:|:--------------:|:--------------:|:--------------:|
 | baseline      | 0.447         | 0.655           | 0.484           | 0.334          | 0.293          | 0.423          |
@@ -154,7 +158,7 @@ The comparison results of different pretrained baackbone models are shown as bel
 | no feature pyramids |||||||
 | [Vit](https://pytorch.org/vision/stable/models/vision_transformer.html)| 0.220| 0.324 | 0.224 | 0.004 | 0.015 | 0.236 |
 | [SwinT](https://pytorch.org/vision/stable/models/swin_transformer.html)| 0.214 | 0.377 | 0.207 | 0.223| 0.145| 0.178 |
-| with feature pyramids (the number of levels is the same as the original RetinaNet structure) |||||||
+| with feature pyramids |||||||
 | [SwinT](https://pytorch.org/vision/stable/models/swin_transformer.html) | 0.242 | 0.398 | 0.224 | 0.244| 0.160| 0.183 |   
 | [EfficientNetV2](https://pytorch.org/vision/main/models/efficientnetv2.html)| 0.441 | 0.637 | 0.478  | 0.231 | 0.225 | 0.435  |
 | [ResNeXT101](https://pytorch.org/vision/main/models/resnext.html) |0.512 | 0.693 | 0.562 | 0.313 | 0.358 | 0.494|           
