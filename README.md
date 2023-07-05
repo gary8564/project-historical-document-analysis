@@ -78,7 +78,7 @@ python train.py --datapath ... --batchsize ... --epochs ... --modelname ... --fr
 * `--warmup` is to input whether to activate the warmup learning rate (True/False). It is an optional input argument. By default, it is set to True.  
 
 (b) Testing
-Run the testing script to output the prediction results as a json file in [Kaggle notebook]() or open your terminal/command line from the `src` directory and execute the following command:
+Run the testing script to output the prediction results as a json file in Kaggle notebook or open your terminal/command line from the `src` directory and execute the following command:
 ```
 python test.py --backbone ... --weights ...
 ```
