@@ -170,6 +170,7 @@ The result of mAP is shown below:
 | backbone      | mAP           | mAP<sub>50</sub>| mAP<sub>75</sub>| mAP<sub>*s*</sub>| mAP<sub>*m*</sub>| mAP<sub>*l*</sub>|
 |:-------------:|:-------------:|:---------------:|:---------------:|:--------------:|:--------------:|:--------------:|
 | [ResNeXT101](https://pytorch.org/vision/main/models/resnext.html) | 0.546 |   0.775 |  0.608  | 0.341  |  0.347  |  0.528 |
+
 The above results show that data augmentation can increase mAP by 6.6%.
 
 #### 4. Final results
