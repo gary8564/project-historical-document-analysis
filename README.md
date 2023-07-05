@@ -2,6 +2,8 @@
 # An Evaluation of RetinaNet on TexBig dataset
 An ablation study on RetinaNet for historical document layout analysis
 
+Matriculation Nr: 124733                           Name: Chia Hao Chang
+
 ## Introduction
 In the realm of document layouts analysis, the results of previous works<sup>[[1]](#1)</sup> <sup>[[2]](#2)</sup> have pointed out that CV-based approaches perform better than NLP-based approaches.
 This project tries to implement a state-of-the-art and efficient object detector to document layout analysis on [TexBig dataset](https://zenodo.org/record/6885144) with the consideration of training constraints on the Kaggle notebook. 
@@ -204,7 +206,7 @@ If the learning rate is set above 0.005, the model tends to diverge. It’s comm
 Anchor boxes are one of the most influential hyperparameters to fine-tune. This can be proved in the baseline fine-tuning stage. Since most of the data contain smaller aspect ratios, I chose to add more anchor boxes and set smaller aspect ratios. The result of mAP is surprisingly improved by 10%.
 
 3. Optimizers:
-At the first stage of fine-tuning, Adam-based optimizers such as Adam, AdamW, or RAdam are chosen as optimizers. However, during the training process, the validation loss of using Adam-based optimizers is worse than using SGD with Nesterov momentum. Numerous paper<sup>[8](#8),[9](#9),[10](#10)</sup> has also pointed out that Adam's generalization performance is worse than SGD, especially on image classification problems. A more recent paper<sup>[11](#11)</sup> further clarified that fine-tuned Adam is always better than SGD, while there exists a performance gap between Adam and SGD when using default hyperparameters. Since it might be difficult to find the optimal hyperparameters and the original paper of RetinaNet also used SGD optimizer, I, therefore, focused only on SGD optimizer. 
+At the first stage of fine-tuning, Adam-based optimizers such as Adam, AdamW, or RAdam are chosen as optimizers. However, during the training process, the validation loss of using Adam-based optimizers is worse than using SGD with Nesterov momentum. Numerous paper<sup>[[8]](#8),[[9]](#9),[[10]](#10)</sup> has also pointed out that Adam's generalization performance is worse than SGD, especially on image classification problems. A more recent paper<sup>[[11]](#11)</sup> further clarified that fine-tuned Adam is always better than SGD, while there exists a performance gap between Adam and SGD when using default hyperparameters. Since it might be difficult to find the optimal hyperparameters and the original paper of RetinaNet also used SGD optimizer, I, therefore, focused only on SGD optimizer. 
 
 3. Backbones:
 (1) Transformers-based backbones:
@@ -217,7 +219,7 @@ At the first stage of fine-tuning, Adam-based optimizers such as Adam, AdamW, or
 
 ## Outlook and Future Work
 In conclusion, despite the complexity of the historical documents dataset, by fine-tuning hyperparameters and increasing backbone model complexities, RetinaNet is still able to detect most of the annotations. Even though mAP on the test dataset leaderboard can only achieve 0.21, the performance can be improved by training more epochs if more powerful computing units can be accessed. More laborious fine-tuning with anchor boxes might also lead to more promising results.
-In future work, unfreezing layers of ViT and SwinT backbone can be further experimented with to check for the improvement of results. Future studies can also try to implement other more recent methodologies such as VitDet<sup>[12](#12)</sup>, which utilized plain ViT-backbone with simple feature pyramid maps. In the ViTDet paper, the author also points out that the results can be benefited from using the readily available pre-trained transformer models from Masked Autoencoder(MAE). Therefore, using the pre-trained model from MAE can also be further discussed.
+In future work, unfreezing layers of ViT and SwinT backbone can be further experimented with to check for the improvement of results. Future studies can also try to implement other more recent methodologies such as VitDet<sup>[[12]](#12)</sup>, which utilized plain ViT-backbone with simple feature pyramid maps. In the ViTDet paper, the author also points out that the results can be benefited from using the readily available pre-trained transformer models from Masked Autoencoder(MAE). Therefore, using the pre-trained model from MAE can also be further discussed.
 
 ## Citation
 <a id="1">[[1]](https://arxiv.org/abs/2212.13924)</a> N.-M. Sven and R. Matteo, “Page layout analysis of text-heavy historical documents: A comparison of textual and visual approaches,” arXiv [cs.IR], 2022.
