@@ -219,7 +219,7 @@ At the first stage of fine-tuning, Adam-based optimizers such as Adam, AdamW, or
    transformers have more learning capacity to detect smaller objects.
    
    (2) ResNeXT and EfficientNet:\
-   In order to speed up the training process, `nn.DataParallel` is utilized to fit with the Kaggle GPU-T4x2 accelerator. The above ablation study indicates that both EfficientNet and ResNeXT yield outstanding performances. In particular, ResNeXT-\
+   In order to speed up the training process, `nn.DataParallel` is utilized to fit with the Kaggle GPU-T4x2 accelerator. The above ablation study indicates that both EfficientNet and ResNeXT yield outstanding performances. In particular, ResNeXT-
    backbone model exceptionally outperforms others.
  
 
