@@ -131,7 +131,7 @@ All of the source code for this project can be found in `src` folder:
 ## Experiment Results
 ### 1. Fine-tuning the baseline model - [pretrained RetinaNet](https://pytorch.org/vision/stable/models/generated/torchvision.models.detection.retinanet_resnet50_fpn_v2.html#torchvision.models.detection.retinanet_resnet50_fpn_v2) 
 #### Grid search hyperparameters of batch size, learning rate, and anchor boxes
-Warm-up StepLR scheduler first linearly increases the learning rate from an initial learning rate of 0.0005 to 0.001 in the first 1000 iterations. After 1000 iterations, the learning rate decays by 0.75 after every 5 epochs. The visualization of the warm-up StepLR scheduler is shown below:
+Warm-up StepLR scheduler first linearly increases the learning rate from an initial learning rate of 0.0005 to 0.001 in the first 1000 iterations. After 1000 iterations, the learning rate decays by 0.75 after every 5 epochs. The visualization of the warm-up StepLR scheduler is shown below:\
 ![learing rate scheduler](https://github.com/BUW-CV/final-project-gary8564/assets/54540162/961b7894-af94-41b3-949f-535efdd1e4d4)
 
 
