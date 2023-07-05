@@ -202,13 +202,13 @@ The comparison between the prediction of the final model and the ground-truth an
 
 
 ## Discussion and Analysis
-1. Learning rates:
+1. Learning rates:\
 If the learning rate is set above 0.005, the model tends to diverge. It’s common to use a smaller learning rate for pre-trained models, in comparison to the (randomly initialized) weights. This is because we expect that the pre-trained weights are relatively good, so we don’t wish to distort them too quickly and too much. <sup>[[7]](#7)</sup>
 
-2. Anchor boxes:
+2. Anchor boxes:\
 Anchor boxes are one of the most influential hyperparameters to fine-tune. This can be proved in the baseline fine-tuning stage. Since most of the data contain smaller aspect ratios, I chose to add more anchor boxes and set smaller aspect ratios. The result of mAP is surprisingly improved by 10%.
 
-3. Optimizers:
+3. Optimizers:\
 At the first stage of fine-tuning, Adam-based optimizers such as Adam, AdamW, or RAdam are chosen as optimizers. However, during the training process, the validation loss of using Adam-based optimizers is worse than using SGD with Nesterov momentum. Numerous paper<sup>[[8]](#8),[[9]](#9),[[10]](#10)</sup> has also pointed out that Adam's generalization performance is worse than SGD, especially on image classification problems. A more recent paper<sup>[[11]](#11)</sup> further clarified that fine-tuned Adam is always better than SGD, while there exists a performance gap between Adam and SGD when using default hyperparameters. Since it might be difficult to find the optimal hyperparameters and the original paper of RetinaNet also used SGD optimizer, I, therefore, focused only on SGD optimizer. 
 
 3. Backbones:\
