@@ -64,7 +64,8 @@ Install the repository in editable mode. Example for MacOS/Linux(Ubuntu):
 
 ## Usage
 (a) Training
-Run the training script from Kaggle notebook or open your terminal/command line from in the `src` directory and execute the following command: 
+····Run the training script from Kaggle notebook or open your terminal/command line from in the `src` directory and execute the 
+····following command: 
 
 ```
 python train.py --datapath ... --batchsize ... --epochs ... --modelname ... --frozen ... --scheduler ... --warmup ...
@@ -78,7 +79,7 @@ python train.py --datapath ... --batchsize ... --epochs ... --modelname ... --fr
 * `--warmup` is to input whether to activate the warmup learning rate (True/False). It is an optional input argument. By default, it is set to True.  
 
 (b) Testing
-Run the testing script to output the prediction results as a json file in Kaggle notebook or open your terminal/command line from the `src` directory and execute the following command:
+····Run the testing script to output the prediction results as a json file in Kaggle notebook or open your terminal/command ····line from the `src` directory and execute the following command:
 ```
 python test.py --backbone ... --weights ...
 ```
@@ -86,7 +87,7 @@ python test.py --backbone ... --weights ...
 * `--weights` is to input the trained model weights path.
 
 (c) Inference:
-To run inference of the trained models on new data, open your terminal/command line from the `src` directory and execute the following command: 
+····To run inference of the trained models on new data, open your terminal/command line from the `src` directory and execute ····the following command: 
 ```
 python inference.py --input ... --threshold ... --model ... --weights ...
 ```
@@ -164,8 +165,10 @@ The comparison results of different pre-trained backbone models are shown as fol
 | [ResNeXT101](https://pytorch.org/vision/main/models/resnext.html) |0.492 | 0.693 | 0.532 | 0.263 | 0.298 | 0.484|           
 
 ### 3. Data Augmentation
-From the ablation study, ResNeXT101 as backbone yields the most promising result. Therefore, in this section, only ResNeXT101 backbone is considered.
+From the ablation study, ResNeXT101 as backbone yields the most promising result. Therefore, in this section, only ResNeXT101 backbone is considered. 
+
 To improve the generalization, data augmentation using several image transformation techniques is implemented. In this study, RandomHorizontalFlip and ColorJitter are implemented. 
+
 The result of mAP is shown below:
 | backbone      | mAP           | mAP<sub>50</sub>| mAP<sub>75</sub>| mAP<sub>*s*</sub>| mAP<sub>*m*</sub>| mAP<sub>*l*</sub>|
 |:-------------:|:-------------:|:---------------:|:---------------:|:--------------:|:--------------:|:--------------:|
@@ -205,12 +208,11 @@ At the first stage of fine-tuning, Adam-based optimizers such as Adam, AdamW, or
 
 3. Backbones:
 (1) Transformers-based backbones:
-In order to fit in the constraints of training capacity, most of the encoder layers are frozen. However, freezing large portion of layers also led to unpromising results. It may be difficult to learn and fit into this complex and domain-specific large dataset if freezing most parts of the model architecture. 
-
-Even though the result is not promising, the above mAP results can still get another interesting observation: SwinT transformers have more learning capacity to detect smaller objects.
+····In order to fit in the constraints of training capacity, most of the encoder layers are frozen. However, freezing large ····portion of layers also led to unpromising results. It may be difficult to learn and fit into this complex and domain-····specific large dataset if freezing most parts of the model architecture.
+····Even though the result is not promising, the above mAP results can still get another interesting observation: SwinT ····transformers have more learning capacity to detect smaller objects.
 
 (2) ResNeXT and EfficientNet:
-In order to speed up the training process, `nn.DataParallel` is utilized to fit with the Kaggle GPU-T4x2 accelerator. The above ablation study indicates that both EfficientNet and ResNeXT yield outstanding performances. In particular, ResNeXT-backbone model exceptionally outperforms others. 
+····In order to speed up the training process, `nn.DataParallel` is utilized to fit with the Kaggle GPU-T4x2 accelerator. The ····above ablation study indicates that both EfficientNet and ResNeXT yield outstanding performances. In particular, ResNeXT-····backbone model exceptionally outperforms others. 
  
 
 ## Outlook and Future Work
