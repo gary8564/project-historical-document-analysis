@@ -2,7 +2,8 @@
 # An Evaluation of RetinaNet on TexBig dataset
 An ablation study on RetinaNet for historical document layout analysis
 
-Matriculation Nr: 124733                           Name: Chia Hao Chang
+Matriculation Nr: 124733\
+Name: Chia Hao Chang
 
 ## Introduction
 In the realm of document layouts analysis, the results of previous works<sup>[[1]](#1)</sup> <sup>[[2]](#2)</sup> have pointed out that CV-based approaches perform better than NLP-based approaches.
