@@ -154,7 +154,7 @@ The comparison results of three model configurations are shown below:\
 | config3       | 0.478         | 0.695           | 0.504           | 0.316          | 0.311          | 0.439          |
 
 ### 2. Ablation study
-The comparison results of different pre-trained backbone models are shown as follows:
+The comparison results of different pre-trained backbone models are shown as follows:\
 (1) Training and validation loss history 
 ![backbones](https://github.com/BUW-CV/final-project-gary8564/assets/54540162/4bc13b28-a0a5-4cc3-9244-cfaebecef559)
 
