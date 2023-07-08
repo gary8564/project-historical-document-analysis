@@ -179,3 +179,5 @@ images/
 *.tif
 test/
 *.json
+*.ipynb
+notebook/

@@ -8,7 +8,7 @@ from PIL import Image
 if __name__ == "__main__":
     # Construct the argument parser.
     parser = argparse.ArgumentParser() 
-    parser.add_argument('-r', '--root', default="/Users/kyle_lee/Desktop/Bauhaus/DL4CV/final-project-gary8564",
+    parser.add_argument('-r', '--root', default="/Users/kyle_lee/Desktop/Bauhaus/DL4CV/project-historical-document-analysis",
                         help='root path of the project')
     parser.add_argument('-i', '--input', default='../archive/val/14688302_1881_Seite_002.tiff', 
                     help='path to input image') 
