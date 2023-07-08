@@ -6,20 +6,23 @@ import os
 import argparse
 
 if __name__ == "__main__":
-    # append system path
-    import sys
-    repo_name = "/Users/kyle_lee/Desktop/Bauhaus/DL4CV/final-project-gary8564"
-    sys.path.append(repo_name)
-    from src import *
     
     # Construct the argument parser.
     parser = argparse.ArgumentParser() 
+    parser.add_argument('-r', '--root', default="/Users/kyle_lee/Desktop/Bauhaus/DL4CV/final-project-gary8564",
+                        help='root path of the project')
     parser.add_argument('-m', '--backbone', default='ResNeXT101FPN', 
                     help='baseline(ResNet50), EfficientNet wtih FPN, ResNeXT101 with FPN',
                     choices=['baseline', 'EfficientNetFPN', 'ResNeXT101FPN'])
     parser.add_argument('-w', '--weights', default='/pretrained/final_model.pt',
                     help='trained model weight path')
     args = vars(parser.parse_args())
+    
+    # append system path
+    import sys
+    repo_name = args['root']
+    sys.path.append(repo_name)
+    from src import *
     
     # load test dataset
     data_dir = os.path.join(repo_name, "test")

@@ -6,13 +6,10 @@ import numpy as np
 from PIL import Image
 
 if __name__ == "__main__":
-    # append system path
-    import sys
-    repo_name = "/Users/kyle_lee/Desktop/Bauhaus/DL4CV/final-project-gary8564"
-    sys.path.append(repo_name)
-    from src import *
     # Construct the argument parser.
     parser = argparse.ArgumentParser() 
+    parser.add_argument('-r', '--root', default="/Users/kyle_lee/Desktop/Bauhaus/DL4CV/final-project-gary8564",
+                        help='root path of the project')
     parser.add_argument('-i', '--input', default='../archive/val/14688302_1881_Seite_002.tiff', 
                     help='path to input image') 
     parser.add_argument('-t', '--threshold', default=0.5, type=float, 
@@ -24,7 +21,11 @@ if __name__ == "__main__":
     parser.add_argument('-w', '--weights', default='../pretrained/final_model.pt',
                     help='trained model weight path')
     args = vars(parser.parse_args())
-
+    # append system path
+    import sys
+    repo_name = args['root']
+    sys.path.append(repo_name)
+    from src import *
     # classes: 0 index is reserved for background
     CLASSES = [
         'background', 'Advertisement', 'Author', 'Caption', 'Column title', 'Decoration', 

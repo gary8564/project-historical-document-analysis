@@ -1,16 +1,11 @@
 import argparse
 
 if __name__ == '__main__':
-    # append system path
-    import sys
-    repo_name = "/Users/kyle_lee/Desktop/Bauhaus/DL4CV/final-project-gary8564"
-    sys.path.append(repo_name)
-    from src import *
-    import torch
-    from torch.utils.data import DataLoader, random_split
     
     # Construct the argument parser.
     parser = argparse.ArgumentParser() 
+    parser.add_argument('-r', '--root', default="/Users/kyle_lee/Desktop/Bauhaus/DL4CV/final-project-gary8564",
+                        help='root path of the project')
     parser.add_argument('-d', '--datapath',
                     help='TexBig dataset root folder')
     parser.add_argument('-b', '--batchsize', default=2,
@@ -31,6 +26,15 @@ if __name__ == '__main__':
                     choices=[True, False])
     
     args = vars(parser.parse_args())
+    
+    # append system path
+    import sys
+    repo_name = args['root']
+    sys.path.append(repo_name)
+    from src import *
+    import torch
+    from torch.utils.data import DataLoader, random_split
+    
 
     # load the dataset
     data_dir = args['datapath']
