@@ -4,12 +4,14 @@ from PIL import Image
 import torch
 import os
 import argparse
-from .config import *
+from config import *
 
 if __name__ == "__main__":
     
     # Construct the argument parser.
-    parser = argparse.ArgumentParser() 
+    parser = argparse.ArgumentParser()
+    parser.add_argument('d', '--datapath', 
+                        help='the path of the stored test dataset')
     parser.add_argument('-m', '--backbone', default='ResNeXT101FPN', 
                     help='baseline(ResNet50), EfficientNet wtih FPN, ResNeXT with FPN',
                     choices=['baseline', 'EfficientNetFPN', 'ResNeXTFPN'])
@@ -26,13 +28,13 @@ if __name__ == "__main__":
     from src import *
     
     # load test dataset
-    data_dir = os.path.join(repo_name, "test")
+    data_dir = args['datapath']
     test_images = glob.glob(f"{data_dir}/*") 
     print(f"Test instances: {len(test_images)}")
     
     # model evaluation
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = get_pretrained_model(device=device, model_name='baseline')
+    model = get_trained_model(device=device, model_name='baseline')
     weights_path = repo_name + args['weights']
     model = load_pretrained_weights(model, weights_path, device)
     model.eval()

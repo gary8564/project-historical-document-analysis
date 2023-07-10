@@ -1,6 +1,6 @@
 import argparse
 import os
-from .config import *
+from config import *
  
 if __name__ == '__main__':
     
