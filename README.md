@@ -1,8 +1,3 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-24ddc0f5d75046c5622901739e7c5dd533143b0c8e959d652212380cedb1ea36.svg)](https://classroom.github.com/a/7EW3yjxG)
-
-Matriculation Nr: 124733 \
-Name: Chia Hao Chang
-
 # An Evaluation of RetinaNet on TexBig dataset
 An ablation study on RetinaNet for historical document layout analysis
 
