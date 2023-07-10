@@ -214,7 +214,7 @@ At the first stage of fine-tuning, Adam-based optimizers such as Adam, AdamW, or
  
 
 ## Outlook and Future Work
-In conclusion, despite the complexity of the historical documents dataset, by fine-tuning hyperparameters and increasing backbone model complexities, RetinaNet is still able to detect most of the annotations. Even though mAP on the test dataset leaderboard can only achieve 0.21, the performance can be improved by training more epochs if more powerful computing units can be accessed. More laborious fine-tuning with anchor boxes might also lead to more promising results. \n
+In conclusion, despite the complexity of the historical documents dataset, by fine-tuning hyperparameters and increasing backbone model complexities, RetinaNet is still able to detect most of the annotations. Even though mAP on the test dataset leaderboard can only achieve 0.21, the performance can be improved by training more epochs if more powerful computing units can be accessed. More laborious fine-tuning with anchor boxes might also lead to more promising results.
 
 In future work, unfreezing layers of ViT and SwinT backbone can be further experimented with to check for the improvement of results. Future studies can also try to implement other more recent methodologies such as VitDet<sup>[[12]](#12)</sup>, which utilized plain ViT-backbone with simple feature pyramid maps. In the ViTDet paper, the author also points out that the results can be benefited from using the readily available pre-trained transformer models from Masked Autoencoder(MAE). Therefore, using the pre-trained model from MAE can also be further discussed.
 
