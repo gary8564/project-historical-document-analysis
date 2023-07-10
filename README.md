@@ -71,32 +71,25 @@ Install the repository in editable mode. Example for MacOS/Linux(Ubuntu):
 Run the training script from Kaggle notebook or open your terminal/command line from in the `src` directory and execute the following command: 
 
 ```
-python train.py --root --datapath ... --batchsize ... --epochs ... --modelname ... --frozen ... --scheduler ... --warmup ...
+python train.py --datapath ... --savepath ...
 ```
-* `--root` is to input the path to the root folder of this project.
 * `--datapath` is to input the root folder location where the TexBig dataset is stored.
-* `--batchsize` is to input the desired batch size. It is an optional input argument. By default, it is set to 2.
-* `--epochs` is to input the desired epochs. It is an optional input argument. By default, it is set to 10.
-* `--modelname is to input the model name for training. It is an optional and limited input argument. Choices of the model name are "baseline", "EfficientNetFPN", "ResNeXT101FPN", "SwinTFPN", "SwinT", and "ViT". By default, it is set to "ResNeXT101FPN".
-* `--frozen` is to input the desired frozen layer names. It is an optional input argument. By default, it is set to None.
-* `--scheduler` is to input whether to activate the StepLR learning rate scheduler (True/False). It is an optional input argument. By default, it is set to False.
-* `--warmup` is to input whether to activate the warmup learning rate (True/False). It is an optional input argument. By default, it is set to True.  
+* `--savepath` is to input the desired save location of the trained model. 
 
 ### 2. Testing
 Run the testing script to output the prediction results as a json file in Kaggle notebook or open your terminal/command ····line from the `src` directory and execute the following command:
 ```
-python test.py --root ... --backbone ... --weights ...
+python test.py --backbone ... --weights ... --savepath ...
 ```
-* `--root` is to input the path to the root folder of this project.
 * `--backbone` is to input the desired backbone model name. Choices are limited to 'baseline', 'EfficientNetFPN', and 'ResNeXT101FPN'. It is an optional input argument. By default, it is set to 'ResNeXT101FPN'.
 * `--weights` is to input the trained model weights path.
+* `--savepath` is to input the desired save location of the output json file.
 
 ### 3. Inference
 To run inference of the trained models on new data, open your terminal/command line from the `src` directory and execute ····the following command: 
 ```
-python inference.py --root ... --input ... --threshold ... --model ... --weights ...
+python inference.py --input ... --threshold ... --model ... --weights ...
 ```
-* `--root` is to input the path to the root folder of this project.
 * `--input` is to input the location of the new image data. 
 * `--threshold` is to input the minimum confidence score for detection. It is an optional input argument. By default, it is set to 0.5.
 * `--model` is to input the desired backbone model name. Choices are limited to 'baseline', 'EfficientNetFPN', 'ResNeXT101FPN'. It is an optional input argument. By default, it is set to 'ResNeXT101FPN'.
@@ -113,9 +106,10 @@ final-project-gary8564/
 │   ├── engines.py
 │   ├── models.py
 │   ├── dataset.py
-│   └── train.py
+│   └── config.py
+│   ├── train.py
 │   ├── test.py
-│   └── inference.py 
+│   └── inference.py
 ├── pyproject.toml
 ├── setup.py
 ├── README.md
@@ -126,10 +120,11 @@ All of the source code for this project can be found in `src` folder:
   2. `engines.py` contains code blocks supported for training.
   3. `models.py` creates RetinaNet model and pretrained backbone models.
   4. `dataset.py` creates the custom Dataset class
-  5. `train.py` contains the executable training script.
-  6. `test.py` contains the executable test script to test a trained model version with corresponding 
+  5. `config.py` stores all training configurations. 
+  6. `train.py` contains the executable training script.
+  7. `test.py` contains the executable test script to test a trained model version with corresponding 
       weights on a validation or test dataset and output the object detection results in a json file.
-  7. `inference.py` contains executable test inference of the trained models on new data.
+  8. `inference.py` contains executable test inference of the trained models on new data.
 
 ## Experiment Results
 ### 1. Fine-tuning the baseline model - [pretrained RetinaNet](https://pytorch.org/vision/stable/models/generated/torchvision.models.detection.retinanet_resnet50_fpn_v2.html#torchvision.models.detection.retinanet_resnet50_fpn_v2) 
@@ -216,17 +211,16 @@ At the first stage of fine-tuning, Adam-based optimizers such as Adam, AdamW, or
 
 3. Backbones:\
    (1) Transformers-based backbones:\
-   In order to fit in the constraints of training capacity, most of the encoder layers are frozen. However, freezing large
-   portions of layers also led to unpromising results. It may be difficult to learn and fit into this complex domain-specific large dataset if freezing most parts of the model architecture.\
+   In order to fit in the constraints of training capacity, most of the encoder layers are frozen. However, freezing large portions of layers also led to unpromising results. It may be difficult to learn and fit into this complex domain-specific large dataset if freezing most parts of the model architecture.\
    Even though the result is not promising, the above mAP results can still get another interesting observation: SwinT transformers have more learning capacity to detect smaller objects.
    
    (2) ResNeXT and EfficientNet:\
-   In order to speed up the training process, `nn.DataParallel` is utilized to fit with the Kaggle GPU-T4x2 accelerator. The above ablation study indicates that both EfficientNet and ResNeXT yield outstanding performances. In particular, ResNeXT-
-   backbone model exceptionally outperforms others.
+   In order to speed up the training process, `nn.DataParallel` is utilized to fit with the Kaggle GPU-T4x2 accelerator. The above ablation study indicates that both EfficientNet and ResNeXT yield outstanding performances. In particular, ResNeXT-backbone model exceptionally outperforms others.
  
 
 ## Outlook and Future Work
-In conclusion, despite the complexity of the historical documents dataset, by fine-tuning hyperparameters and increasing backbone model complexities, RetinaNet is still able to detect most of the annotations. Even though mAP on the test dataset leaderboard can only achieve 0.21, the performance can be improved by training more epochs if more powerful computing units can be accessed. More laborious fine-tuning with anchor boxes might also lead to more promising results.
+In conclusion, despite the complexity of the historical documents dataset, by fine-tuning hyperparameters and increasing backbone model complexities, RetinaNet is still able to detect most of the annotations. Even though mAP on the test dataset leaderboard can only achieve 0.21, the performance can be improved by training more epochs if more powerful computing units can be accessed. More laborious fine-tuning with anchor boxes might also lead to more promising results. \n
+
 In future work, unfreezing layers of ViT and SwinT backbone can be further experimented with to check for the improvement of results. Future studies can also try to implement other more recent methodologies such as VitDet<sup>[[12]](#12)</sup>, which utilized plain ViT-backbone with simple feature pyramid maps. In the ViTDet paper, the author also points out that the results can be benefited from using the readily available pre-trained transformer models from Masked Autoencoder(MAE). Therefore, using the pre-trained model from MAE can also be further discussed.
 
 ## Citation

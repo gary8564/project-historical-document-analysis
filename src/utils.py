@@ -13,6 +13,9 @@ import seaborn as sns
 import numpy as np
 import cv2
 import pandas as pd
+from pycocotools.cocoeval import COCOeval
+from pycocotools.coco import COCO
+
 
 def collate_fn(batch):
     """
@@ -117,6 +120,38 @@ def prepare_for_evaluation(predictions):
             ]
         )
     return coco_results
+
+def evaluate_summary(model, data_loader, device, coco_gt):
+    """
+    Evaluate the test dataset. Using built-in pycocotools for evaluation.
+    Args:
+        model (nn.Module)
+        data_loader (DataLoader)
+        device (torch.device)
+        coco_gt (COCO): ground-truth annonation in COCO format.
+    """
+    cpu_device = torch.device("cpu")
+    model.eval()
+    imgIds = coco_gt.getImgIds()
+    coco_results = []
+    img_ids = []
+    for image, targets in data_loader:
+        image = list(img.to(device) for img in image)
+        targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
+        outputs = model(image)
+        outputs = [{k: v.to(cpu_device) for k, v in t.items()} for t in outputs]
+        res = {target["image_id"].item(): output for target, output in zip(targets, outputs)}
+        img_ids.extend(np.unique(list(res.keys())))
+        coco_results.extend(prepare_for_evaluation(res))
+    output_filepath = "./val_pred.json"
+    with open(output_filepath, "w") as final:
+        json.dump(coco_results, final)
+    coco_dt = coco_gt.loadRes(output_filepath) if coco_results else COCO()
+    cocoEval = COCOeval(coco_gt, coco_dt, 'bbox')
+    cocoEval.params.imgIds = imgIds
+    cocoEval.evaluate()
+    cocoEval.accumulate()
+    cocoEval.summarize()
 
 def predict(image, model, device, detection_threshold, classes, save_filename):
     # Create a BGR copy of the image for annotation.
@@ -250,6 +285,8 @@ def plot_multiple_losses_and_accuracies(model_data_list):
         ax0.set_ylabel("loss", fontsize=20)
         ax1.set_xlabel("epoch", fontsize=20)
         ax1.set_ylabel("mAP", fontsize=20)
+        ax0.set_xticks([0,5,10,15,20]) 
+        ax1.set_xticks([0,5,10,15,20])
         ax0.tick_params(axis='x', labelsize=18)
         ax0.tick_params(axis='y', labelsize=18)
         ax1.tick_params(axis='x', labelsize=18)

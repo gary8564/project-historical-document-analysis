@@ -1,35 +1,21 @@
 import argparse
-
+import os
+from .config import *
+ 
 if __name__ == '__main__':
     
     # Construct the argument parser.
     parser = argparse.ArgumentParser() 
-    parser.add_argument('-r', '--root', default="/Users/kyle_lee/Desktop/Bauhaus/DL4CV/project-historical-document-analysis",
-                        help='root path of the project')
     parser.add_argument('-d', '--datapath',
                     help='TexBig dataset root folder')
-    parser.add_argument('-b', '--batchsize', default=2,
-                    help='batch size')
-    parser.add_argument('-e', '--epochs', default=10,
-                    help='epochs')
-    parser.add_argument('-n', '--modelname', default="ResNeXT101FPN",
-                    help='model name',
-                    choices=["baseline", "EfficientNetFPN", "ResNeXT101FPN", 
-                             "SwinTFPN", "SwinT", "ViT"])
-    parser.add_argument('-f', '--frozen', default=None, nargs='*',
-                    help='frozen layer names')
-    parser.add_argument('-s', '--scheduler', default=False,
-                    help='whether to activate learning rate schedueler (boolean: true/false)',
-                    choices=[True, False])
-    parser.add_argument('-w', '--warmup', default=True,
-                    help='whether to activate learning rate warmup (boolean: true/false)',
-                    choices=[True, False])
+    parser.add_argument('-s', '--savepath', default='../pretrained',
+                    help='trained model save path')
     
     args = vars(parser.parse_args())
     
     # append system path
     import sys
-    repo_name = args['root']
+    repo_name = REPO_NAME
     sys.path.append(repo_name)
     from src import *
     import torch
@@ -39,30 +25,30 @@ if __name__ == '__main__':
     # load the dataset
     data_dir = args['datapath']
     annot_filename = 'train'
-    train_transformers = get_transform(moreAugmentations=False)
+    train_transformers = get_transform(moreAugmentations=DATA_AUG)
     train = TexBigDataset(data_dir, annot_filename, train_transformers)
     train_size = int(0.8 * len(train))
     val_size = len(train) - train_size
     train_dataset, val_dataset = random_split(train, [train_size, val_size])
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    batch_size = args['batchsize']
-    num_epochs = args['epochs']
+    batch_size = BATCH_SIZE
+    num_epochs = EPOCH
     train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)
     val_loader = DataLoader(dataset=val_dataset, batch_size=batch_size, shuffle=False,collate_fn=collate_fn)
-    model_name = args['modelname']
-    get_model(device=device, model_name=model_name)
-    frozen_layers = args['frozen']
+    model_name = MODEL_NAME[2]
+    model = retinaNet(num_classes=NUM_CLASSES, device=device, backbone=model_name, anchor_sizes=ANCHOR_SIZES, aspect_ratios=ASPECT_RATIOS)
+    frozen_layers = FROZEN_LAYERS
     if frozen_layers is not None:
         model = freeze_layers(model, frozen_layers).to(device)
-    params = [p for p in model.parameters() if p.requires_grad]
-    optimizer = torch.optim.SGD(params, lr=1e-03, momentum=0.9, nesterov=True, weight_decay=1e-05)
+    params = [p for p in model.parameters() if p.requires_grad]        
+    optimizer = torch.optim.SGD(params, lr=LEARNING_RATE, momentum=0.9, nesterov=True, weight_decay=WEIGHT_DECAY)
     lr_scheduler = None
-    if args['scheduler']:
+    if SCHEDULER:
         lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
                                                step_size=int(num_epochs/3),
                                                gamma=0.75)
-    train_losses, val_losses, mAP_50, mAP = train_and_validate_model(model, train_loader, val_loader, optimizer, num_epochs, device, args['warmup'], lr_scheduler)
+    train_losses, val_losses, mAP_50, mAP = train_and_validate_model(model, train_loader, val_loader, optimizer, num_epochs, device, WARMPUP, lr_scheduler)
     # save trained models and configuration results
     save_results_csv(model_name, train_losses, val_losses, mAP)
-    PATH = "./model_%s.pt" %(model_name)
+    PATH = os.join(args['savepath'], "model_%s.pt" %(model_name))
     torch.save(model.state_dict(), PATH)

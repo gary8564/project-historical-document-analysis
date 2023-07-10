@@ -4,23 +4,24 @@ from PIL import Image
 import torch
 import os
 import argparse
+from .config import *
 
 if __name__ == "__main__":
     
     # Construct the argument parser.
     parser = argparse.ArgumentParser() 
-    parser.add_argument('-r', '--root', default="/Users/kyle_lee/Desktop/Bauhaus/DL4CV/project-historical-document-analysis",
-                        help='root path of the project')
     parser.add_argument('-m', '--backbone', default='ResNeXT101FPN', 
-                    help='baseline(ResNet50), EfficientNet wtih FPN, ResNeXT101 with FPN',
-                    choices=['baseline', 'EfficientNetFPN', 'ResNeXT101FPN'])
-    parser.add_argument('-w', '--weights', default='/pretrained/final_model.pt',
+                    help='baseline(ResNet50), EfficientNet wtih FPN, ResNeXT with FPN',
+                    choices=['baseline', 'EfficientNetFPN', 'ResNeXTFPN'])
+    parser.add_argument('-w', '--weights', default='../pretrained/final_model.pt',
                     help='trained model weight path')
+    parser.add_argument('-s', '--savepath', default=REPO_NAME,
+                    help='test json file save path')
     args = vars(parser.parse_args())
     
     # append system path
     import sys
-    repo_name = args['root']
+    repo_name = REPO_NAME
     sys.path.append(repo_name)
     from src import *
     
@@ -31,7 +32,7 @@ if __name__ == "__main__":
     
     # model evaluation
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = get_model(device=device, model_name='baseline')
+    model = get_pretrained_model(device=device, model_name='baseline')
     weights_path = repo_name + args['weights']
     model = load_pretrained_weights(model, weights_path, device)
     model.eval()
@@ -64,7 +65,7 @@ if __name__ == "__main__":
                     for k, box in enumerate(boxes)
                 ]
             )
-    result_filepath = repo_name + "/test.json"
+    result_filepath = os.join(args['savepath'], "test.json")
     with open(result_filepath, "w") as outfile:
         json.dump(coco_results, outfile)
         

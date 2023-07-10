@@ -215,8 +215,8 @@ def roIPooler():
     )
     return roi_pooler
 
-def get_model(device='cpu', model_name='baseline'):
-    assert model_name in ["baseline", "EfficientNetFPN", "ResNeXT101FPN", 
+def get_trained_model(device='cpu', model_name='baseline'):
+    assert model_name in ["baseline", "EfficientNetFPN", "ResNeXTFPN", 
                           "SwinTFPN", "SwinT", "ViT"]
     if model_name == 'baseline':
         backboneModel = resnet_fpn_backbone('resnet50', weights=ResNet50_Weights.DEFAULT)
@@ -231,7 +231,7 @@ def get_model(device='cpu', model_name='baseline'):
         anchor_sizes = tuple((x, int(x * 2 ** (1.0 / 3)), int(x * 2 ** (2.0 / 3))) for x in [32, 64, 128, 256, 512])
         aspect_ratios = ((0.33, 0.5, 1.0, 2.0),) * len(anchor_sizes)
         model = retinaNet(num_classes=20, device=device, backbone="EfficientNet_FPN", anchor_sizes=anchor_sizes, aspect_ratios=aspect_ratios)
-    elif model_name == 'ResNeXT101FPN':
+    elif model_name == 'ResNeXTFPN':
         anchor_sizes = tuple((x, int(x * 2 ** (1.0 / 3)), int(x * 2 ** (2.0 / 3))) for x in [32, 64, 128, 256, 512])
         aspect_ratios=((0.33, 0.5, 1.0, 2.0),) * len(anchor_sizes)
         model = retinaNet(num_classes=20, device=device, backbone="ResNeXt_FPN", anchor_sizes=anchor_sizes, aspect_ratios=aspect_ratios)

@@ -1,21 +1,17 @@
+import torch
+from torch import optim
+from torchmetrics.detection.mean_ap import MeanAveragePrecision
+from tqdm import tqdm
+import pandas as pd
+import numpy as np
+import time
+
 """
 References: 
     1. https://github.com/pytorch/vision/blob/v0.3.0/references/detection/engine.py
     2. https://debuggercafe.com/custom-object-detection-using-pytorch-faster-rcnn/
     3. https://pseudo-lab.github.io/Tutorial-Book-en/chapters/en/object-detection/Ch4-RetinaNet.html
 """
-
-import matplotlib.pyplot as plt
-import torch
-from torch import nn, optim
-from torchmetrics.detection.mean_ap import MeanAveragePrecision
-from tqdm import tqdm
-import pandas as pd
-import time
-from pycocotools.cocoeval import COCOeval
-from pycocotools.coco import COCO
-import numpy as np
-import json
 
 def train_one_epoch(model, data_loader, optimizer, device, warmup_scheduler = None):
     """
@@ -156,61 +152,6 @@ def save_results_csv(model_name, train_losses, val_losses, mAP):
     savepath = "%s.csv" %(model_name)
     df.to_csv (savepath, index=False, header=True)
     
-if __name__ == "__main__":
-    from utils import *
-    from models import *
-    train_img_path = "../archive"
-    train_annot_filename = "train"
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = retinaNet(num_classes=20, device=device)
-    train_transformers = get_transform(moreAugmentations=True)
-    dataset = TexBigDataset(train_img_path, train_annot_filename, train_transformers)
-    data_loader = torch.utils.data.DataLoader(dataset, batch_size=2, shuffle=True, 
-                                              collate_fn=collate_fn)
-    for (i, data) in enumerate(data_loader):
-        images, targets = data
-        images = list(image.to(device) for image in images)
-        targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
-
-def plot_multiple_losses_and_accuracies(model_data_list):
-    """
-    Plots training and testing losses and mAP for multiple models.
-
-    Args:
-        model_data_list (list of dict): A list of dictionaries containing the following keys:
-            - 'name' (str): The name of the model (for the legend)
-            - 'train_losses' (list): Training losses per epoch
-            - 'test_losses' (list): Testing losses per epoch
-            - 'test_mAP' (list): Testing mean average precision per epoch
-    """
-    fig = plt.figure(figsize=(21,15))
-    ax0 = fig.add_subplot(121)
-    ax1 = fig.add_subplot(122)
-    for i, model_data in enumerate(model_data_list):
-        train_losses = model_data.get("train_losses")
-        test_losses = model_data.get("test_losses")
-        test_mAP = model_data.get("mAP")
-        line, = ax0.plot(train_losses, label=model_data.get("name")+" (Train)", linestyle = '-')
-        ax0.plot(test_losses, label=model_data.get("name")+" (Test)", 
-                 color = line.get_color(), linestyle = ':')
-        ax1.plot(test_mAP, label=model_data.get("name"))
-        ax0.legend(fontsize="14")
-        ax1.legend(fontsize="14")
-        ax0.set_title("Loss", fontsize=26)
-        ax1.set_title("mAP", fontsize=26)
-        ax0.set_xlabel("epoch", fontsize=20)
-        ax0.set_ylabel("loss", fontsize=20)
-        ax1.set_xlabel("epoch", fontsize=20)
-        ax1.set_ylabel("mAP", fontsize=20)
-        ax0.set_xticks([0,5,10,15,20]) 
-        ax1.set_xticks([0,5,10,15,20])
-        ax0.tick_params(axis='x', labelsize=18)
-        ax0.tick_params(axis='y', labelsize=18)
-        ax1.tick_params(axis='x', labelsize=18)
-        ax1.tick_params(axis='y', labelsize=18)
-    fig.suptitle("Performance for different model architectures", fontsize=36)
-    plt.show()
-    
 def warmup_lr_scheduler(optimizer, warmup_iters):
     """
     Define a warm-up learning rate sheduler
@@ -227,3 +168,5 @@ def warmup_lr_scheduler(optimizer, warmup_iters):
     """
     warmup_scheduler = optim.lr_scheduler.LinearLR(optimizer, start_factor=1e-03, total_iters=warmup_iters)
     return warmup_scheduler
+
+
