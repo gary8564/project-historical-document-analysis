@@ -1,5 +1,5 @@
 # An Evaluation of RetinaNet on TexBig dataset
-An ablation study on RetinaNet for historical document layout analysis
+Deep Learning for Computer Vision course project: An ablation study on RetinaNet for historical document layout analysis
 
 ## Introduction
 In the realm of document layouts analysis, the results of previous works<sup>[[1]](#1)</sup> <sup>[[2]](#2)</sup> have pointed out that CV-based approaches perform better than NLP-based approaches.
