@@ -76,6 +76,7 @@ Run the testing script to output the prediction results as a json file in Kaggle
 ```
 python test.py --backbone ... --weights ... --savepath ...
 ```
+* `--datapath` is to input the root folder location where the test dataset is stored.
 * `--backbone` is to input the desired backbone model name. Choices are limited to 'baseline', 'EfficientNetFPN', and 'ResNeXT101FPN'. It is an optional input argument. By default, it is set to 'ResNeXT101FPN'.
 * `--weights` is to input the trained model weights path.
 * `--savepath` is to input the desired save location of the output json file.

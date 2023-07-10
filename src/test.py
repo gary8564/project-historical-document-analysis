@@ -11,7 +11,7 @@ if __name__ == "__main__":
     # Construct the argument parser.
     parser = argparse.ArgumentParser()
     parser.add_argument('d', '--datapath', 
-                        help='the path of the stored test dataset')
+                        help='the root folder path of the stored test dataset')
     parser.add_argument('-m', '--backbone', default='ResNeXT101FPN', 
                     help='baseline(ResNet50), EfficientNet wtih FPN, ResNeXT with FPN',
                     choices=['baseline', 'EfficientNetFPN', 'ResNeXTFPN'])
